@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\LabelController;
+use App\Http\Controllers\ExampleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,7 @@ use App\Http\Controllers\LabelController;
 Route::get('/', function () { return redirect('/cards'); });
 Route::resource('cards', CardController::class);
 Route::resource('labels', LabelController::class);
+Route::resource('examples', ExampleController::class);
 
 Route::get('/quiz', function () { return view('quiz'); });
 

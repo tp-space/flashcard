@@ -3,10 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Card;
+use App\Models\Example;
 
-class CardController extends Controller
+class ExampleController extends Controller
 {
+    //
     /**
      * Display a listing of the resource.
      *
@@ -14,10 +15,10 @@ class CardController extends Controller
      */
     public function index()
     {
+        //
+        $examples = Example::all();
 
-        $cards = Card::all();
-
-        return view('cards', ['cards' => $cards]);
+        return view('examples', ['examples' => $examples]);
     }
 
     /**
@@ -25,13 +26,9 @@ class CardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function create()
     {
         //
-        $symbol = $request->get("tp_symbol","");
-        error_log("ok");
-        error_log($symbol);
-        return $this->index();
     }
 
     /**
@@ -54,8 +51,6 @@ class CardController extends Controller
     public function show($id)
     {
         //
-        session(['card_id' => $id]);
-        return $this->index();
     }
 
     /**

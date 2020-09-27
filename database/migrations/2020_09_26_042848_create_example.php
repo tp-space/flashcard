@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateLabel extends Migration
+class CreateExample extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateLabel extends Migration
      */
     public function up()
     {
-        Schema::create('label', function (Blueprint $table) {
+        Schema::create('example', function (Blueprint $table) {
             $table->id();
-            $table->text("label");
+            $table->text("example");
+            $table->text("translation");
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ class CreateLabel extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('label');
+        Schema::dropIfExists('example');
     }
 }

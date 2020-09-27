@@ -6,25 +6,26 @@
 
 @section ('content')
     <div class="container">
+    <h1>Examples</h1>
 
-        <h1>Labels</h1>
-
-        <table id="tp_card" class="display">
-        <thead>
-            <tr>
-                <th>Label name</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($labels as $label)
-                <tr>
-                    <td>{{ $label->name }}</td>
-                </tr>
+    <table id="tp_card" class="display">
+    <thead>
+        <tr>
+            <th>Example</th>
+            <th>Translation</th>
+        </tr>
+    </thead>
+    <tbody>
+            @foreach ($examples as $example)
+        <tr>
+            <td>{{ $example->example }}</td>
+            <td>{{ $example->translation }}</td>
+        </tr>
             @endforeach
             </tbody>
-        </table>
+    </table>
 
-    </div>
+</div>
 @endsection
 
 @push ('scripts')
