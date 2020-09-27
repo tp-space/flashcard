@@ -19,7 +19,7 @@ test
     {{ Session::get('card_id', '0') }}
 
     <!-- Button to Open the Modal -->
-    <button type="button" id="tp_card_new" class="btn btn-primary">New</button>
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#tp_modal_card" data-op="new">New</button>
 
     <table id="tp_card" class="display">
     <thead>
@@ -34,16 +34,21 @@ test
     </thead>
     <tbody>
             @foreach ($cards as $card)
-        <tr id="tp_tr_{{ $card->id }}">
+        <tr id="tp_tr_{{ $card->id }}" data-id="{{ $card->id }}">
             <td tp_item="tp_id">{{ $card->id }}</td>
             <td tp_item="tp_symbol">{{ $card->symbol }}</td>
             <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
-            <td tp_item="tp_translate">{{ $card->translate }}</td>
+            <td tp_item="tp_translation">{{ $card->translation }}</td>
             <td tp_item="tp_example">{{ $card->example }}</td>
             <td>
-                <button class="tp_card_edit_button">Edit</button>
-                <button>delete</button>
-                <button>clone</button>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">Edit</button>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#tp_modal_card" data-op="clone">Clone</button>
+
+                <form action="{{ url('/cards', ['id' => $card->id]) }}" method="post">
+                    @csrf
+                    @method('delete')
+                    <button class="btn btn-primary" type="submit">Delete</button>
+                </form>
             </td>
         </tr>
             @endforeach
@@ -59,14 +64,14 @@ test
 
       <!-- Modal Header -->
       <div class="modal-header">
-        <h4 class="modal-title">Create Card</h4>
+        <h4 class="modal-title" id="tp_modal_title">TBD</h4>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
 
       <!-- Modal body -->
       <div class="modal-body">
 
-         <form action="/cards/create" class="was-validated">
+         <form id="tp_modal_card_form" action="/cards" method="TBD" class="was-validated">
 
               <!-- hidden variables -->
               <input type="hidden" id="tp_id" name="tp_id">
@@ -136,12 +141,32 @@ test
             });
             
 
+        } );
 
-            // create new card
-            $('#tp_card_new').on('click', function(e) {
+        function sendDelete(event){
+            console.log($(event.target));
+            id = $(event.target).parent().parent().data('id');
+            console.log(id);
+            $.ajax({
+            url: '/cards/' + id,
+                type: 'DELETE',
+                success: function(result) {
+                }
+            });
+        }
 
-                // Prevent default behavior of click event
-                e.preventDefault();
+        $('#tp_modal_card').on('show.bs.modal', function (event) {
+
+            // get operation from button that triggered the modal form
+            var button = $(event.relatedTarget);
+            var op = button.data('op');
+
+            switch(op) {
+            case "new":
+
+                // configure modal form
+                $('#tp_modal_title').html('Create Card');
+                $('tp_modal_card_form').attr('method', 'POST');
 
                 // initialize modal form values
                 $('#tp_modal_card #tp_id').val('');
@@ -149,31 +174,104 @@ test
                 $('#tp_modal_card #tp_pinyin').val('');
                 $('#tp_modal_card #tp_translation').val('');
 
-                // show modal form
-                $('#tp_modal_card').modal('show');
+                break;
 
-            });
+            case "edit":
 
-            // edit card
-            $('.tp_card_edit_button').on('click', function(e) {
+                // configure modal form
+                $('#tp_modal_title').html('Edit Card');
+                $('tp_modal_card_form').attr('method', 'PUT');
 
-                // Prevent default behavior of click event
-                e.preventDefault();
-
-                // initialize modal form values
-                
-                var el_tr = $(this).parent().parent();
+                // code block
+                var el_tr = $(button).parent().parent();
                 $('#tp_modal_card #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
 
-                // show modal form
-                $('#tp_modal_card').modal('show');
+                break;
 
-            });
+            case "clone":
+                // code block
+                var el_tr = $(button).parent().parent();
+                $('#tp_modal_card #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
+                $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
+                $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
+                $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                break;
+            default:
+                // code block
+                assert(true);
+            } 
 
-        } );
+            var el_tr = $(button).parent().parent();
+            $('#tp_modal_card #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
+            $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
+            $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
+            $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+
+
+                var modal = $(this)
+                modal.find('.modal-title').text('New message to ' + recipient)
+                modal.find('.modal-body input').val(recipient)
+        });
+
+        // edit card
+        $('.tp_card_edit_button').on('click', function(e) {
+
+            console.log('edit');
+            // Prevent default behavior of click event
+            e.preventDefault();
+
+
+            // populate modal form with values of the selected record
+            var el_tr = $(this).parent().parent();
+            $('#tp_modal_card #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
+            $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
+            $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
+            $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+
+            // show modal form
+            $('#tp_modal_card').modal('show');
+
+        });
+
+        // clone card
+        $('.tp_card_clone_button').on('click', function(e) {
+
+            console.log('clone');
+            // Prevent default behavior of click event
+            e.preventDefault();
+
+            // configure modal form
+            $('#tp_modal_title').html('Clone Card');
+            $('tp_modal_card_form').attr('action', '/cards/create');
+            $('tp_modal_card_form').attr('method', 'GET');
+
+            // populate modal form with values of the selected record
+            var el_tr = $(this).parent().parent();
+            $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
+            $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
+            $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+
+            // show modal form
+            $('#tp_modal_card').modal('show');
+
+        });
+
+        // delete card
+        $('.tp_card_delete_button').on('click', function(e) {
+
+            console.log('delete');
+            // Prevent default behavior of click event
+            e.preventDefault();
+
+            // Send delete request
+            /* console.log( $(this).data('id)); */
+
+
+
+        });
     </script>
 @endpush
 

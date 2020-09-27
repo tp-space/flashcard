@@ -7,6 +7,20 @@ use App\Models\Card;
 
 class CardController extends Controller
 {
+
+    private function populateRecord($data, $request){
+
+        // populate record with data in request
+        $data->symbol = $request->get("tp_symbol","<unknown>");
+        $data->pinyin = $request->get("tp_pinyin","<unknown>");
+        $data->translation = $request->get("tp_translation","<unknown>");
+        $data->example = "";
+        $data->comment = "";
+        $data->done = False;
+
+        return $data;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -15,9 +29,9 @@ class CardController extends Controller
     public function index()
     {
 
-        $cards = Card::all();
+        $cards = Card::orderBy('id', 'DESC')->get();
+        return view('cards', compact('cards'));
 
-        return view('cards', ['cards' => $cards]);
     }
 
     /**
@@ -27,11 +41,7 @@ class CardController extends Controller
      */
     public function create(Request $request)
     {
-        //
-        $symbol = $request->get("tp_symbol","");
-        error_log("ok");
-        error_log($symbol);
-        return $this->index();
+        // Same as store, but uses GET => Not needed
     }
 
     /**
@@ -42,7 +52,13 @@ class CardController extends Controller
      */
     public function store(Request $request)
     {
-        //
+
+        $card = new Card;
+        $card = $this->populateRecord($card, $request);
+        $card->save();
+
+        return redirect('/cards/' + $card->id)->with('success', 'New card has been added');
+
     }
 
     /**
@@ -53,9 +69,10 @@ class CardController extends Controller
      */
     public function show($id)
     {
-        //
+
         session(['card_id' => $id]);
         return $this->index();
+
     }
 
     /**
@@ -66,7 +83,7 @@ class CardController extends Controller
      */
     public function edit($id)
     {
-        //
+        // Same as update, but uses GET => Not needed
     }
 
     /**
@@ -78,7 +95,13 @@ class CardController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        $card = Card::findOrFail($id);
+        $card = $this->populateRecord($card, $request);
+        $card->save();
+
+        return redirect('/cards/' + $id)->with('success', 'Card has been changed');
+
     }
 
     /**
@@ -89,6 +112,11 @@ class CardController extends Controller
      */
     public function destroy($id)
     {
-        //
+
+        $card = Card::findOrFail($id);
+        $card->delete();
+
+        return redirect('/cards')->with('success', 'Card has been deleted');
+
     }
 }
