@@ -1,7 +1,6 @@
 @extends ('app')
 
 @push ('css')
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
 @endpush
 
 @section ('content')
@@ -10,20 +9,23 @@
         data-card_id="{{ Session::get("card_id", "0") }}"
         id="tp_const">
     </div>
-    <div class="container shadow mb-5 mt-5 bg-light rounded">
-test
+
+    <div id="tp_content_loading" class="container shadow mb-5 mt-5 bg-light rounded">
+        loading
     </div>
-
     <div id="tp_content" class="container shadow mb-5 mt-5 bg-light rounded" style="display: none;">
-    <h1>Flashcards</h1>
-    {{ Session::get('card_id', '0') }}
+    <div class="row mt-3 mb-3">
+        <div class="col-md-6 text-md-left"><h1>Cards</h1></div>
+        <div class="col-md-6 text-md-right">
 
-    <!-- Button to Open the Modal -->
-    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#tp_modal_card" data-op="new">
-        <i class="fa fa-plus"></i>
-    </button>
+            <!-- Button New -->
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#tp_modal_card" data-op="new">
+                <i class="fa fa-plus"></i>
+            </button>
 
-    <table id="tp_card_table" class="display">
+        </div>
+    </div>
+        <table id="tp_card_table" class="display">
     <thead>
         <tr>
             <th>ID</th>
@@ -42,20 +44,16 @@ test
             <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
             <td tp_item="tp_translation">{{ $card->translation }}</td>
             <td tp_item="tp_example">{{ $card->example }}</td>
-            <td style="width: 25%">
+            <td>
                 <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
                     <i class="fa fa-edit"></i>
                 </button>
                 <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="clone">
                     <i class="fa fa-clone"></i>
                 </button>
-                <button class="btn btn-sm btn-danger" type="submit" form="tp_card_delete_form-{{ $card->id }}">
+                <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#tp_modal_card_delete">
                     <i class="fa fa-trash"></i>
                 </button>
-                <form id="tp_card_delete_form-{{ $card->id }}" action="{{ url('/cards', ['id' => $card->id]) }}" method="post">
-                    @csrf
-                    @method('delete')
-                </form>
             </td>
         </tr>
             @endforeach
@@ -65,7 +63,7 @@ test
 </div>
 
 
-<!-- The Modal -->
+<!-- The Modal Create/Edit/clone -->
 <div class="modal" id="tp_modal_card">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -81,8 +79,6 @@ test
 
          <form id="tp_modal_card_form" action="/cards" method="POST" class="was-validated">
 
-              <!-- hidden variables -->
-              <input type="hidden" id="tp_id" name="tp_id">
               @csrf
 
               <div class="form-group">
@@ -103,14 +99,46 @@ test
                 <div class="invalid-feedback">Please fill out this field.</div>
               </div>
 
-              <button type="submit" class="btn btn-primary">Submit</button>
         </form>
 
       </div>
 
       <!-- Modal footer -->
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary" form="tp_modal_card_form">Submit</button>
+          <button type="button" class="btn btn-standard" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- The Modal Delete -->
+<div class="modal" id="tp_modal_card_delete">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Delete Card</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+
+         <form id="tp_modal_card_delete_form" action="/cards" method="post">
+              @csrf
+              @method('delete')
+              <p id="tp_modal_card_delete_text"></p>
+        </form>
+
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-danger" form="tp_modal_card_delete_form">Delete</button>
+        <button type="button" class="btn btn-standard" data-dismiss="modal">Close</button>
       </div>
 
     </div>
@@ -118,12 +146,9 @@ test
 </div>
 
 
-
 @endsection
 
 @push ('scripts')
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.10.21/api/row().show().js"></script>
     <script>
 
         $(document).ready( function () {
@@ -148,6 +173,7 @@ test
                     }
 
                     console.log('test');
+                    $('#tp_content_loading').hide();
                     $('#tp_content').show();
                 }
             });
@@ -180,12 +206,16 @@ test
 
             case "edit":
 
+                // get card id
+                var el_tr = $(button).parent().parent();
+                var id = el_tr.find('[tp_item="tp_id"]').html();
+
                 // configure modal form
                 $('#tp_modal_title').html('Edit Card');
-                $('tp_modal_card_form').attr('method', 'PUT');
+                $('#tp_modal_card_form').attr('method', 'PUT');
+                $('#tp_modal_card_form').attr('action', '/cards/' + id);
 
                 // code block
-                var el_tr = $(button).parent().parent();
                 $('#tp_modal_card #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
@@ -201,7 +231,6 @@ test
 
                 // code block
                 var el_tr = $(button).parent().parent();
-                $('#tp_modal_card #tp_id').val('');
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
@@ -214,6 +243,18 @@ test
 
         });
 
+        $(document).on('shown.bs.modal', '#tp_modal_card_delete', function (event) {
+
+            // get card id
+            var button = $(event.relatedTarget);
+            var el_tr = $(button).parent().parent();
+            id = el_tr.find('[tp_item="tp_id"]').html();
+
+            // update modal form content
+            $('#tp_modal_card_delete_form').attr('action', '/cards/' + id);
+            $('#tp_modal_card_delete_text').html('Do you really want to delete '  + id + '?');
+
+        });
     </script>
 @endpush
 

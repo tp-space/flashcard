@@ -84,6 +84,9 @@ class CardController extends Controller
     public function edit($id)
     {
         // Same as update, but uses GET => Not needed
+
+        error_log('test');
+        error_log($id);
     }
 
     /**
@@ -96,6 +99,7 @@ class CardController extends Controller
     public function update(Request $request, $id)
     {
 
+        error_log($id);
         $card = Card::findOrFail($id);
         $card = $this->populateRecord($card, $request);
         $card->save();
