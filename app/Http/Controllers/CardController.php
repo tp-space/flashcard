@@ -57,7 +57,7 @@ class CardController extends Controller
         $card = $this->populateRecord($card, $request);
         $card->save();
 
-        return redirect('/cards/' + $card->id)->with('success', 'New card has been added');
+        return redirect('/cards/' . strval($card->id))->with('success', 'New card has been added');
 
     }
 
