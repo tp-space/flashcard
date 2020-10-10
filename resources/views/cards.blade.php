@@ -28,7 +28,7 @@
     <table id="tp_card_table" class="display">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Card ID</th>
                 <th>Symbol</th>
                 <th>Pinyin</th>
                 <th>Translation</th>
@@ -95,7 +95,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="tp_pinyin">Translation:</label>
+                        <label for="tp_translation">Translation:</label>
                         <input type="text" class="form-control" id="tp_translation" placeholder="Enter the translation" name="tp_translation" required>
                         <div class="invalid-feedback">Please fill out this field.</div>
                     </div>
