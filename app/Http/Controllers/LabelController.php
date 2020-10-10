@@ -7,6 +7,14 @@ use App\Models\Label;
 
 class LabelController extends Controller
 {
+
+    private function populateRecord($data, $request){
+
+        // populate record with data in request
+        $data->label = $request->get("tp_label","<unknown>");
+
+        return $data;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -15,9 +23,8 @@ class LabelController extends Controller
     public function index()
     {
         //
-        $labels = Label::all();
-
-        return view('labels', ['labels' => $labels]);
+        $labels = Label::orderBy('id', 'DESC')->get();
+        return view('labels', compact('labels'));
     }
 
     /**
@@ -27,7 +34,7 @@ class LabelController extends Controller
      */
     public function create()
     {
-        //
+        // Same as store, but uses GET => Not needed
     }
 
     /**
@@ -38,7 +45,11 @@ class LabelController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $label = new Label;
+        $label = $this->populateRecord($label, $request);
+        $label->save();
+
+        return redirect('/labels/' . $label->id)->with('success', 'New "' .  $label->label .'" label has been added');
     }
 
     /**
@@ -49,7 +60,8 @@ class LabelController extends Controller
      */
     public function show($id)
     {
-        //
+        session(['label_id' => $id]);
+        return $this->index();
     }
 
     /**
@@ -60,7 +72,7 @@ class LabelController extends Controller
      */
     public function edit($id)
     {
-        //
+        // Same as update, but uses GET => Not needed
     }
 
     /**
@@ -72,7 +84,11 @@ class LabelController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $label = Label::findOrFail($id);
+        $label = $this->populateRecord($label, $request);
+        $label->save();
+
+        return redirect('/labels/' . $id)->with('success', 'Label "' . $label->label . '" has been changed');
     }
 
     /**
@@ -83,6 +99,9 @@ class LabelController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $label = Label::findOrFail($id);
+        $label->delete();
+
+        return redirect('/labels')->with('success', 'Label "' . $label->label  . '" has been deleted');
     }
 }

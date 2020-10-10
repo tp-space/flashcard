@@ -57,7 +57,7 @@ class CardController extends Controller
         $card = $this->populateRecord($card, $request);
         $card->save();
 
-        return redirect('/cards/' . strval($card->id))->with('success', 'New card has been added');
+        return redirect('/cards/' . $card->id)->with('success', 'New card "' . $card->symbol . '" has been added');
 
     }
 
@@ -84,9 +84,6 @@ class CardController extends Controller
     public function edit($id)
     {
         // Same as update, but uses GET => Not needed
-
-        error_log('test');
-        error_log($id);
     }
 
     /**
@@ -99,12 +96,11 @@ class CardController extends Controller
     public function update(Request $request, $id)
     {
 
-        error_log($id);
         $card = Card::findOrFail($id);
         $card = $this->populateRecord($card, $request);
         $card->save();
 
-        return redirect('/cards/' + $id)->with('success', 'Card has been changed');
+        return redirect('/cards/' . $id)->with('success', 'Card "' . $card->symbol . '" has been changed');
 
     }
 
@@ -120,7 +116,7 @@ class CardController extends Controller
         $card = Card::findOrFail($id);
         $card->delete();
 
-        return redirect('/cards')->with('success', 'Card has been deleted');
+        return redirect('/cards')->with('success', 'Card "' . $card->symbol . '" has been deleted');
 
     }
 }

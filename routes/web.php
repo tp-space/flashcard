@@ -17,6 +17,7 @@ use App\Http\Controllers\ExampleController;
 */
 
 Route::get('/', function () { return redirect('/cards'); });
+
 Route::resource('cards', CardController::class);
 Route::resource('labels', LabelController::class);
 Route::resource('examples', ExampleController::class);
