@@ -11,5 +11,15 @@ class Card extends Model
 
     protected $table = "card";
 
+    public function labels()
+    {
+        return $this->belongsToMany(
+            Label::class,
+            'card_label_mapping',
+            'card_id',
+            'label_id',
+        );
+    }
+
 
 }

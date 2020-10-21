@@ -30,7 +30,7 @@ class CardController extends Controller
     public function index()
     {
 
-        $cards = Card::orderBy('id', 'DESC')->get();
+        $cards = Card::with('labels')->orderBy('id', 'DESC')->get();
         $labels = Label::orderBy('label')->get();
         return view('cards', compact('cards', 'labels'));
 
@@ -58,6 +58,9 @@ class CardController extends Controller
         $card = new Card;
         $card = $this->populateRecord($card, $request);
         $card->save();
+
+        // update relationship
+        $card->labels()->sync($request->get("tp_labels", "[]"));
 
         return redirect('/cards/' . $card->id)->with('success', 'New card "' . $card->symbol . '" has been added');
 
@@ -102,6 +105,9 @@ class CardController extends Controller
         $card = $this->populateRecord($card, $request);
         $card->save();
 
+        // update relationship
+        $card->labels()->sync($request->get("tp_labels", "[]"));
+
         return redirect('/cards/' . $id)->with('success', 'Card "' . $card->symbol . '" has been changed');
 
     }
@@ -117,6 +123,9 @@ class CardController extends Controller
 
         $card = Card::findOrFail($id);
         $card->delete();
+
+        // update relationship
+        $card->labels()->detach();
 
         return redirect('/cards')->with('success', 'Card "' . $card->symbol . '" has been deleted');
 

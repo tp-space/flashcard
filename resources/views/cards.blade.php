@@ -43,7 +43,9 @@
                 <td tp_item="tp_symbol">{{ $card->symbol }}</td>
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
-                <td tp_item="tp_labels">{{ $card->labels }}</td>
+                <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}"> 
+                    {{ implode(', ', $card->labels->pluck('label')->toArray()) }}
+                </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
                         <i class="fa fa-edit"></i>
@@ -106,11 +108,13 @@
                         <select 
                             class="form-control selectpicker" 
                             id="tp_labels" 
+                            name="tp_labels[]" 
                             title="No label selected" 
-                            multiple 
-                            data-live-search="true">
+                            data-live-search="true" 
+                            {{-- required --}} --}}
+                            multiple>
                             @foreach ($labels as $label)
-                            <option id="{{ $label->id }}">{{ $label->label }}</option>
+                                <option value="{{ $label->id }}">{{ $label->label }}</option>
                             @endforeach
                         </select>
                         <div class="invalid-feedback">Please select at least one netry.</div>
@@ -214,7 +218,7 @@
                 $('#tp_modal_card #tp_symbol').val('');
                 $('#tp_modal_card #tp_pinyin').val('');
                 $('#tp_modal_card #tp_translation').val('');
-                $('#tp_modal_card #tp_labels').val('');
+                $('#tp_modal_card #tp_labels').val([]).change();
 
                 break;
 
@@ -234,7 +238,7 @@
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
-                $('#tp_modal_card #tp_labels').val(el_tr.find('[tp_item="tp_labels"]').html());
+                $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change();
 
                 break;
 
@@ -249,8 +253,10 @@
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
-                $('#tp_modal_card #tp_labels').val(el_tr.find('[tp_item="tp_labels"]').html());
+                $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change();
+
                 break;
+
             default:
 
                 // code block
