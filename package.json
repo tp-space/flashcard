@@ -24,13 +24,13 @@
     "test": "tests"
   },
   "dependencies": {
-    "@popperjs/core": "^2.5.3",
     "bootstrap": "^4.5.2",
     "bootstrap-select": "^1.13.18",
     "datatables.net": "^1.10.22",
     "datatables.net-dt": "^1.10.22",
     "datatables.net-plugins": "^1.10.20",
-    "jquery": "^3.5.1"
+    "jquery": "^3.5.1",
+    "popper.js": "^1.16.1"
   },
   "keywords": [],
   "author": "",

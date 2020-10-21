@@ -32,7 +32,7 @@
                 <th>Symbol</th>
                 <th>Pinyin</th>
                 <th>Translation</th>
-                <th>Examples</th>
+                <th>Labels</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -43,7 +43,7 @@
                 <td tp_item="tp_symbol">{{ $card->symbol }}</td>
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
-                <td tp_item="tp_example">{{ $card->example }}</td>
+                <td tp_item="tp_labels">{{ $card->labels }}</td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
                         <i class="fa fa-edit"></i>
@@ -77,7 +77,7 @@
             <!-- Modal body -->
             <div class="modal-body">
 
-                <form id="tp_modal_card_form" action="/cards" method="POST" class="was-validated">
+                <form id="tp_modal_card_form" action="/cards" method="POST">
 
                     @csrf
                     <input type="hidden" id="_method_change" name="_method" value="TBD">
@@ -98,6 +98,22 @@
                         <label for="tp_translation">Translation:</label>
                         <input type="text" class="form-control" id="tp_translation" placeholder="Enter the translation" name="tp_translation" required>
                         <div class="invalid-feedback">Please fill out this field.</div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="tp_labels">Labels:</label>
+                        <select 
+                            class="form-control selectpicker" 
+                            id="tp_labels" 
+                            title="No label selected" 
+                            multiple 
+                            data-live-search="true">
+                            @foreach ($labels as $label)
+                            <option id="{{ $label->id }}">{{ $label->label }}</option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback">Please select at least one netry.</div>
                     </div>
 
                 </form>
@@ -185,9 +201,7 @@
 
             // get operation from button that triggered the modal form
             var button = $(event.relatedTarget);
-            console.log(button);
             var op = button.data('op');
-            console.log(op);
 
             switch(op) {
             case "new":
@@ -200,6 +214,7 @@
                 $('#tp_modal_card #tp_symbol').val('');
                 $('#tp_modal_card #tp_pinyin').val('');
                 $('#tp_modal_card #tp_translation').val('');
+                $('#tp_modal_card #tp_labels').val('');
 
                 break;
 
@@ -219,6 +234,7 @@
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                $('#tp_modal_card #tp_labels').val(el_tr.find('[tp_item="tp_labels"]').html());
 
                 break;
 
@@ -233,12 +249,14 @@
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                $('#tp_modal_card #tp_labels').val(el_tr.find('[tp_item="tp_labels"]').html());
                 break;
             default:
 
                 // code block
                 assert(true);
             } 
+                $('#tp_labels').selectpicker();
 
         });
 

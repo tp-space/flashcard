@@ -56,7 +56,7 @@
 
         <!-- JS, Popper.js, and jQuery -->
         <script src="/comp/jquery/jquery.slim.min.js"></script>
-        <script src="/comp/popperjs/core/umd/popper.min.js"></script>
+        <script src="/comp/popperjs/umd/popper.min.js"></script>
         <script src="/comp/bootstrap/js/bootstrap.min.js"></script>
 
         <!-- Latest compiled and minified JavaScript -->

@@ -16,7 +16,7 @@ mix
     .copyDirectory("node_modules/jquery/dist", "public/comp/jquery")
     .copyDirectory("node_modules/bootstrap/dist", "public/comp/bootstrap")
     .copyDirectory("node_modules/bootstrap-select/dist", "public/comp/bootstrap-select")
-    .copyDirectory("node_modules/@popperjs/core/dist", "public/comp/popperjs/core")
+    .copyDirectory("node_modules/popper.js/dist", "public/comp/popperjs")
     .copyDirectory("node_modules/datatables.net/js", "public/comp/datatables.net/js")
     .copyDirectory("node_modules/datatables.net-dt/js", "public/comp/datatables.net/js")
     .copyDirectory("node_modules/datatables.net-dt/images", "public/comp/datatables.net/images")

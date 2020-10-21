@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Card;
+use App\Models\Label;
 
 class CardController extends Controller
 {
@@ -30,7 +31,8 @@ class CardController extends Controller
     {
 
         $cards = Card::orderBy('id', 'DESC')->get();
-        return view('cards', compact('cards'));
+        $labels = Label::orderBy('label')->get();
+        return view('cards', compact('cards', 'labels'));
 
     }
 
