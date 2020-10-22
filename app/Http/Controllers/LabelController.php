@@ -73,6 +73,9 @@ class LabelController extends Controller
         $label = $this->populateRecord($label, $request);
         $label->save();
 
+        // update relationship
+        $label->cards()->sync($request->get("tp_cards", "[]"));
+
         return redirect('/labels/' . $label->id)->with('success', 'New "' .  $label->label .'" label has been added');
     }
 
@@ -112,6 +115,9 @@ class LabelController extends Controller
         $label = $this->populateRecord($label, $request);
         $label->save();
 
+        // update relationship
+        $label->cards()->sync($request->get("tp_cards", "[]"));
+
         return redirect('/labels/' . $id)->with('success', 'Label "' . $label->label . '" has been changed');
     }
 
@@ -125,6 +131,9 @@ class LabelController extends Controller
     {
         $label = Label::findOrFail($id);
         $label->delete();
+
+        // update relationship
+        $label->cards()->detach();
 
         return redirect('/labels')->with('success', 'Label "' . $label->label  . '" has been deleted');
     }

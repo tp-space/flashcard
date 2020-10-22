@@ -87,6 +87,23 @@
                         <div class="invalid-feedback">Please fill out this field.</div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="tp_cards">Cards:</label>
+                        <select 
+                            class="form-control selectpicker" 
+                            id="tp_cards" 
+                            name="tp_cards[]" 
+                            title="No card selected" 
+                            data-live-search="true" 
+                            {{-- required --}} --}}
+                            multiple>
+                            @foreach ($filterCards as $card)
+                                <option value="{{ $card->id }}">{{ $card->symbol }}</option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback">Please select at least one entry.</div>
+                    </div>
+
                 </form>
 
             </div>
@@ -142,6 +159,9 @@
             var label_id = $('#tp_const').data('label_id');
             $('#tp_tr_' + label_id).addClass('selected');
 
+            // initialize dropdown for labels
+            $('#tp_cards').selectpicker();
+
             var table = $('#tp_label_table').DataTable({
                 "order": [[ 0, "desc" ]],
                 "initComplete": function(settings, json, label_id) {
@@ -179,6 +199,7 @@
 
                 // initialize modal form values
                 $('#tp_modal_label #tp_label').val('');
+                $('#tp_modal_label #tp_cards').val([]).change();
 
                 break;
 
@@ -196,6 +217,7 @@
                 // code block
                 $('#tp_modal_label #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
                 $('#tp_modal_label #tp_label').val(el_tr.find('[tp_item="tp_label"]').html());
+                $('#tp_modal_label #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
 
                 break;
 
@@ -208,6 +230,8 @@
                 // code block
                 var el_tr = $(button).parent().parent();
                 $('#tp_modal_label #tp_label').val(el_tr.find('[tp_item="tp_label"]').html());
+                $('#tp_modal_label #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
+
                 break;
             default:
 

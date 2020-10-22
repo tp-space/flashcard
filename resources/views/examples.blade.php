@@ -32,6 +32,7 @@
                 <th>Example ID</th>
                 <th>Example</th>
                 <th>Translation</th>
+                <th>Cards</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -41,6 +42,10 @@
                 <td tp_item="tp_id">{{ $example->id }}</td>
                 <td tp_item="tp_example">{{ $example->example }}</td>
                 <td tp_item="tp_translation">{{ $example->translation }}</td>
+                <td tp_item="tp_cards" tp_value="{{ $example->cards->pluck('id') }}">
+                    {{ implode(', ', $example->cards->pluck('symbol')->toArray()) }}
+                    <a href="/filter/example/{{ $example->id }}/cards">({{ $example->cards->count() }})</a>
+                </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_example" data-op="edit">
                         <i class="fa fa-edit"></i>
@@ -102,6 +107,24 @@
                         <div class="invalid-feedback">Please fill out this field.</div>
                     </div>
 
+                    <div class="form-group">
+                        <label for="tp_cards">Cards:</label>
+                        <select 
+                            class="form-control selectpicker" 
+                            id="tp_cards" 
+                            name="tp_cards[]" 
+                            title="No card selected" 
+                            data-live-search="true" 
+                            {{-- required --}} --}}
+                            multiple>
+                            @foreach ($filterCards as $card)
+                                <option value="{{ $card->id }}">{{ $card->symbol }}</option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback">Please select at least one entry.</div>
+                    </div>
+
+
                 </form>
 
             </div>
@@ -157,6 +180,8 @@
             var example_id = $('#tp_const').data('example_id');
             $('#tp_tr_' + example_id).addClass('selected');
 
+            // initialize dropdown for labels
+            $('#tp_cards').selectpicker();
 
             var table = $('#tp_example_table').DataTable({
                 "order": [[ 0, "desc" ]],
@@ -197,6 +222,7 @@
                 // initialize modal form values
                 $('#tp_modal_example #tp_example').val('');
                 $('#tp_modal_example #tp_translation').val('');
+                $('#tp_modal_example #tp_cards').val([]).change();
 
                 break;
 
@@ -216,6 +242,7 @@
                 $('#tp_modal_example #tp_example').val(el_tr.find('[tp_item="tp_example"]').html());
                 $('#tp_modal_example #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_example #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                $('#tp_modal_example #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
 
                 break;
 
@@ -230,6 +257,8 @@
                 $('#tp_modal_example #tp_example').val(el_tr.find('[tp_item="tp_example"]').html());
                 $('#tp_modal_example #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_example #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                $('#tp_modal_example #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
+
                 break;
             default:
 

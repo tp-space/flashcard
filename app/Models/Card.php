@@ -21,5 +21,15 @@ class Card extends Model
         );
     }
 
+    public function examples()
+    {
+        return $this->belongsToMany(
+            Example::class,
+            'card_example_mapping',
+            'card_id',
+            'example_id',
+        );
+    }
+
 
 }

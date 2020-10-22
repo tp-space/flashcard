@@ -26,8 +26,22 @@ class ExampleController extends Controller
      */
     public function index(Request $request)
     {
+        // extract filter
+        $exampleIds = $request->session()->get('filter_example_ids', []);
+        $cardIds = $request->session()->get('filter_card_ids', []);
 
-        $examples = Example::orderBy('id', 'DESC')->get();
+        // get examples
+        $examples = Example::with('cards');
+        if (count($exampleIds) > 0){
+            $examples = $examples->wherein('id', $exampleIds); 
+        }
+        if (count($cardIds) > 0)
+        {
+            $examples = $examples->whereHas('cards', function($query) use ($cardIds) {
+                $query->wherein('card.id', $cardIds); 
+            });
+        }
+        $examples = $examples->orderBy('id', 'DESC')->get();
 
         // get data for filters
         $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
@@ -60,6 +74,9 @@ class ExampleController extends Controller
         $example = $this->populateRecord($example, $request);
         $example->save();
 
+        // update relationship
+        $example->cards()->sync($request->get("tp_cards", "[]"));
+
         return redirect('/examples/' . $example->id)
             ->with('success', 'New example "' . $example->example . '" has been added');
 
@@ -71,11 +88,11 @@ class ExampleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
 
         session(['example_id' => $id]);
-        return $this->index();
+        return $this->index($request);
 
     }
 
@@ -104,6 +121,9 @@ class ExampleController extends Controller
         $example = $this->populateRecord($example, $request);
         $example->save();
 
+        // update relationship
+        $example->cards()->sync($request->get("tp_cards", "[]"));
+
         return redirect('/examples/' . $id)
             ->with('success', 'Example "' . $example->example . '" has been changed');
 
@@ -119,6 +139,9 @@ class ExampleController extends Controller
     {
         $example = Example::findOrFail($id);
         $example->delete();
+
+        // update relationship
+        $example->cards()->detach();
 
         return redirect('/examples')->with('success', 'Example "' . $example->symbol . '" has been deleted');
 

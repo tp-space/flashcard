@@ -33,9 +33,10 @@ class CardController extends Controller
         // extract filter
         $cardIds = $request->session()->get('filter_card_ids', []);
         $labelIds = $request->session()->get('filter_label_ids', []);
+        $exampleIds = $request->session()->get('filter_example_ids', []);
 
         // get cards
-        $cards = Card::with('labels');
+        $cards = Card::with('labels')->with('examples');
         if (count($cardIds) > 0){
             $cards = $cards->wherein('id', $cardIds); 
         }
@@ -43,6 +44,12 @@ class CardController extends Controller
         {
             $cards = $cards->whereHas('labels', function($query) use ($labelIds) {
                 $query->wherein('label.id', $labelIds); 
+            });
+        }
+        if (count($exampleIds) > 0)
+        {
+            $cards = $cards->whereHas('examples', function($query) use ($exampleIds) {
+                $query->wherein('example.id', $exampleIds); 
             });
         }
         $cards = $cards->orderBy('id', 'DESC')->get();
@@ -81,6 +88,7 @@ class CardController extends Controller
 
         // update relationship
         $card->labels()->sync($request->get("tp_labels", "[]"));
+        $card->examples()->sync($request->get("tp_examples", "[]"));
 
         return redirect('/cards/' . $card->id)->with('success', 'New card "' . $card->symbol . '" has been added');
 
@@ -127,6 +135,7 @@ class CardController extends Controller
 
         // update relationship
         $card->labels()->sync($request->get("tp_labels", "[]"));
+        $card->examples()->sync($request->get("tp_examples", "[]"));
 
         return redirect('/cards/' . $id)->with('success', 'Card "' . $card->symbol . '" has been changed');
 
@@ -146,6 +155,7 @@ class CardController extends Controller
 
         // update relationship
         $card->labels()->detach();
+        $card->examples()->detach();
 
         return redirect('/cards')->with('success', 'Card "' . $card->symbol . '" has been deleted');
 

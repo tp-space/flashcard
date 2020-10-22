@@ -33,6 +33,7 @@
                 <th>Pinyin</th>
                 <th>Translation</th>
                 <th>Labels</th>
+                <th>Examples</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -46,6 +47,10 @@
                 <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}"> 
                     {{ implode(', ', $card->labels->pluck('label')->toArray()) }}
                     <a href="/filter/card/{{ $card->id }}/labels">({{ $card->labels->count() }})</a>
+                </td>
+                <td tp_item="tp_examples" tp_value="{{ json_encode($card->examples->pluck('id')) }}"> 
+                    {{ implode(', ', $card->examples->pluck('example')->toArray()) }}
+                    <a href="/filter/card/{{ $card->id }}/examples">({{ $card->examples->count() }})</a>
                 </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
@@ -118,7 +123,24 @@
                                 <option value="{{ $label->id }}">{{ $label->label }}</option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback">Please select at least one netry.</div>
+                        <div class="invalid-feedback">Please select at least one entry.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tp_examples">Examples:</label>
+                        <select 
+                            class="form-control selectpicker" 
+                            id="tp_examples" 
+                            name="tp_examples[]" 
+                            title="No example selected" 
+                            data-live-search="true" 
+                            {{-- required --}} --}}
+                            multiple>
+                            @foreach ($filterExamples as $example)
+                                <option value="{{ $example->id }}">{{ substr($example->example,0,50) }}</option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback">Please select at least one entry.</div>
                     </div>
 
                 </form>
@@ -181,6 +203,7 @@
 
             // initialize dropdown for labels
             $('#tp_labels').selectpicker();
+            $('#tp_examples').selectpicker();
 
             var table = $('#tp_card_table').DataTable({
                 "order": [[ 0, "desc" ]],
@@ -222,6 +245,7 @@
                 $('#tp_modal_card #tp_pinyin').val('');
                 $('#tp_modal_card #tp_translation').val('');
                 $('#tp_modal_card #tp_labels').val([]).change();
+                $('#tp_modal_card #tp_examples').val([]).change();
 
                 break;
 
@@ -242,6 +266,7 @@
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
                 $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change();
+                $('#tp_modal_card #tp_examples').val(JSON.parse(el_tr.find('[tp_item="tp_examples"]').attr('tp_value'))).change();
 
                 break;
 
@@ -257,6 +282,7 @@
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
                 $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change();
+                $('#tp_modal_card #tp_examples').val(JSON.parse(el_tr.find('[tp_item="tp_examples"]').attr('tp_value'))).change();
 
                 break;
 
