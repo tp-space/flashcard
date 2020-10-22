@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Card;
 use App\Models\Label;
+use App\Models\Example;
 
 class LabelController extends Controller
 {
@@ -24,7 +26,13 @@ class LabelController extends Controller
     {
         //
         $labels = Label::orderBy('id', 'DESC')->get();
-        return view('labels', compact('labels'));
+
+        // get data for filters
+        $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
+        $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
+        $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
+
+        return view('labels', compact('labels', 'filterCards', 'filterLabels', 'filterExamples'));
     }
 
     /**
@@ -58,10 +66,10 @@ class LabelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         session(['label_id' => $id]);
-        return $this->index();
+        return $this->index($request);
     }
 
     /**
@@ -104,4 +112,5 @@ class LabelController extends Controller
 
         return redirect('/labels')->with('success', 'Label "' . $label->label  . '" has been deleted');
     }
+
 }

@@ -45,6 +45,7 @@
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
                 <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}"> 
                     {{ implode(', ', $card->labels->pluck('label')->toArray()) }}
+                    <a href="/filter/card/{{ $card->id }}/labels">({{ $card->labels->count() }})</a>
                 </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
@@ -113,7 +114,7 @@
                             data-live-search="true" 
                             {{-- required --}} --}}
                             multiple>
-                            @foreach ($labels as $label)
+                            @foreach ($filterLabels as $label)
                                 <option value="{{ $label->id }}">{{ $label->label }}</option>
                             @endforeach
                         </select>
@@ -178,6 +179,8 @@
             var card_id = $('#tp_const').data('card_id');
             $('#tp_tr_' + card_id).addClass('selected');
 
+            // initialize dropdown for labels
+            $('#tp_labels').selectpicker();
 
             var table = $('#tp_card_table').DataTable({
                 "order": [[ 0, "desc" ]],
@@ -262,7 +265,6 @@
                 // code block
                 assert(true);
             } 
-                $('#tp_labels').selectpicker();
 
         });
 

@@ -23,32 +23,102 @@
 
     </head>
 	<body>
+
 		@include('navbar')
 
         <div class="container shadow mb-5 mt-5 pt-2 pb-2 bg-light rounded">
-<div class="mb-15">
-            <select class="selectpicker" title="No cards selected" multiple data-live-search="true">
-                <option>Test</option>
-            </select>
-            <select class="selectpicker" title="No examples selected" multiple data-live-search="true">
-                <option>Test</option>
-            </select>
-            <select class="selectpicker" title="No labels selected" multiple data-live-search="true">
-                <option>Test</option>
-            </select>
-            @if ($message = Session::get('success'))
-            <div class="alert alert-success alert-block">
-                <button type="button" class="close" data-dismiss="alert">x</button>
-                <span>{{ $message }}</span>
+            <div class="mb-15">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-10">
+                            <form id="tp_filter_form" action="/filter" method="POST">
+
+                                @csrf
+                                <input name="tp_url" type="hidden" value="{{ Request::url() }}">
+
+                                @php ($sel_cards = Session::get('filter_card_ids', []))
+                                <select 
+                                                                   id="tp_filter_card" 
+                                                                   name="tp_filter_card[]" 
+                                                                   class="selectpicker filter" 
+                                                                   title="No cards selected" 
+                                                                   onchange="this.form.submit()" 
+                                                                   multiple data-live-search="true">
+
+                                    @foreach ($filterCards as $filterCard)
+                                    @php ($sel = (in_array($filterCard->id, $sel_cards) ? 'selected' : ''))
+                                        <option {{ $sel }} value="{{ $filterCard->id }}">
+                                            {{ $filterCard->symbol }}
+                                        </option>
+                                    @endforeach
+
+                                </select>
+
+                                @php ($sel_examples = Session::get('filter_example_ids', []))
+                                <select 
+                                                       id="tp_filter_example" 
+                                                       name="tp_filter_example[]" 
+                                                       class="selectpicker filter" 
+                                                       title="No examples selected" 
+                                                       onchange="this.form.submit()" 
+                                                       multiple data-live-search="true">
+
+                                    @foreach ($filterExamples as $filterExample)
+                                    @php ($sel = (in_array($filterExample->id, $sel_examples) ? 'selected' : ''))
+                                    <option {{ $sel }} value="{{ $filterExample->id }}">
+                                        {{ $filterExample->example }}
+                                    </option>
+                                    @endforeach
+
+                                </select>
+
+                                @php ($sel_labels = Session::get('filter_label_ids', []))
+                                <select 
+                                                       id="tp_filter_label" 
+                                                       name="tp_filter_label[]" 
+                                                       class="selectpicker filter" 
+                                                       title="No labels selected" 
+                                                       onchange="this.form.submit()" 
+                                                       multiple data-live-search="true">
+
+                                    @foreach ($filterLabels as $filterLabel)
+                                    @php ($sel = (in_array($filterLabel->id, $sel_labels) ? 'selected' : ''))
+                                    <option {{ $sel }} value="{{ $filterLabel->id }}">
+                                        {{ $filterLabel->label }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        </div>
+                        <div class="col-2">
+
+                            <form id="tp_filter_clear_form" action="/filter" method="POST">
+                                @csrf
+                                <input name="tp_url" type="hidden" value="{{ Request::url() }}">
+                                <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i></button>
+                            </form>
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            @if ($message = Session::get('success'))
+                            <div class="alert alert-success alert-block">
+                                <button type="button" class="close" data-dismiss="alert">x</button>
+                                <span>{{ $message }}</span>
+                            </div>
+                            @endif
+                            @if ($message = Session::get('error'))
+                            <div class="alert alert-danger alert-block">
+                                <button type="button" class="close" data-dismiss="alert">x</button>
+                                <span>{{ $message }}</span>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
             </div>
-            @endif
-            @if ($message = Session::get('error'))
-            <div class="alert alert-danger alert-block">
-                <button type="button" class="close" data-dismiss="alert">x</button>
-                <span>{{ $message }}</span>
-            </div>
-            @endif
-        </div>
         </div>
 
 		@yield('content')
@@ -68,7 +138,7 @@
 
         <script>
             $(document).ready( function () {
-                $('select').selectpicker();
+                $('.filter').selectpicker();
             });
         </script>
         @stack('scripts')

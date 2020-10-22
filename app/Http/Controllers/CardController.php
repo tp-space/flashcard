@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Card;
 use App\Models\Label;
+use App\Models\Example;
 
 class CardController extends Controller
 {
@@ -27,12 +28,24 @@ class CardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        // extract filter
+        $cardIds = $request->session()->get('filter_card_ids', []);
 
-        $cards = Card::with('labels')->orderBy('id', 'DESC')->get();
-        $labels = Label::orderBy('label')->get();
-        return view('cards', compact('cards', 'labels'));
+        // get cards
+        $cards = Card::with('labels');
+        if (count($cardIds) > 0){
+            $cards = $cards->wherein('id', $cardIds); 
+        }
+        $cards = $cards->orderBy('id', 'DESC')->get();
+
+        // get data for filters
+        $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
+        $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
+        $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
+
+        return view('cards', compact('cards', 'filterCards', 'filterLabels', 'filterExamples'));
 
     }
 
@@ -72,11 +85,11 @@ class CardController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
 
         session(['card_id' => $id]);
-        return $this->index();
+        return $this->index($request);
 
     }
 
