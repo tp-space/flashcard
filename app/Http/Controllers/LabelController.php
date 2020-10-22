@@ -22,10 +22,26 @@ class LabelController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        $labels = Label::orderBy('id', 'DESC')->get();
+
+        // extract filter
+        $labelIds = $request->session()->get('filter_label_ids', []);
+        $cardIds = $request->session()->get('filter_card_ids', []);
+
+        // get labels
+        $labels = Label::with('cards');
+        if (count($labelIds) > 0)
+        {
+            $labels = $labels->wherein('id', $labelIds);
+        }
+        if (count($cardIds) > 0)
+        {
+            $labels = $labels->whereHas('cards', function($query) use ($cardIds) {
+                $query->wherein('card.id', $cardIds); 
+            });
+        }
+        $labels = $labels->orderBy('id', 'DESC')->get();
 
         // get data for filters
         $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();

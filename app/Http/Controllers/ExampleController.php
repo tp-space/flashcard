@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Card;
+use App\Models\Label;
 use App\Models\Example;
 
 class ExampleController extends Controller
@@ -22,12 +24,17 @@ class ExampleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
 
         $examples = Example::orderBy('id', 'DESC')->get();
-        return view('examples', compact('examples'));
 
+        // get data for filters
+        $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
+        $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
+        $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
+
+        return view('examples', compact('examples', 'filterCards', 'filterLabels', 'filterExamples'));
     }
 
     /**

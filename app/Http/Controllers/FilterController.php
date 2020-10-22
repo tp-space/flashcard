@@ -9,8 +9,17 @@ class FilterController extends Controller
     //
     public function setSingleFilter($source, $id, $target)
     {
+        // clear all filters
+        session([
+            'filter_card_ids' => [],
+            'filter_label_ids' => [],
+            'filter_example_ids' => [],
+        ]);
+
+        // set the selected filter
         $var = 'filter_' . $source .  '_ids';
         session([$var => [$id]]);
+
         return redirect($target);
     }
 

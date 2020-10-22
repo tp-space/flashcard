@@ -10,4 +10,16 @@ class Label extends Model
     use HasFactory;
 
     protected $table = "label";
+
+    public function cards()
+    {
+        return $this->belongsToMany(
+            Card::class,
+            'card_label_mapping',
+            'label_id',
+            'card_id',
+        );
+    }
+
+
 }

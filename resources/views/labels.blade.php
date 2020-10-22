@@ -31,6 +31,7 @@
             <tr>
                 <th>Label ID</th>
                 <th>Label name</th>
+                <th>Cards</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -39,6 +40,10 @@
             <tr id="tp_tr_{{ $label->id }}" data-id="{{ $label->id }}">
                 <td tp_item="tp_id">{{ $label->id }}</td>
                 <td tp_item="tp_label">{{ $label->label }}</td>
+                <td tp_item="tp_cards" tp_value="{{ $label->cards->pluck('id') }}">
+                    {{ implode(', ', $label->cards->pluck('symbol')->toArray()) }}
+                    <a href="/filter/label/{{ $label->id }}/cards">({{ $label->cards->count() }})</a>
+                </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_label" data-op="edit">
                         <i class="fa fa-edit"></i>

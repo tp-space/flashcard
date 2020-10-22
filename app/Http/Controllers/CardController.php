@@ -32,11 +32,18 @@ class CardController extends Controller
     {
         // extract filter
         $cardIds = $request->session()->get('filter_card_ids', []);
+        $labelIds = $request->session()->get('filter_label_ids', []);
 
         // get cards
         $cards = Card::with('labels');
         if (count($cardIds) > 0){
             $cards = $cards->wherein('id', $cardIds); 
+        }
+        if (count($labelIds) > 0)
+        {
+            $cards = $cards->whereHas('labels', function($query) use ($labelIds) {
+                $query->wherein('label.id', $labelIds); 
+            });
         }
         $cards = $cards->orderBy('id', 'DESC')->get();
 
