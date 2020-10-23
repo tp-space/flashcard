@@ -90,7 +90,7 @@
                                 </select>
                             </form>
                         </div>
-                        <div class="col-2">
+                        <div class="col-2 text-right">
 
                             <form id="tp_filter_clear_form" action="/filter" method="POST">
                                 @csrf
