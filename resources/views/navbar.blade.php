@@ -13,14 +13,14 @@
         </button>
         <div class="collapse navbar-collapse" id="tp_nav">
             <ul class="navbar-nav mr-auto">
+                <li class="nav-item {{ Request::is('labels') ? 'active' : '' }}">
+                    <a class="nav-link" href="/labels">Labels <span class="sr-only">(current)</span></a>
+                </li>
                 <li class="nav-item {{ Request::is('cards') ? 'active' : '' }}">
                     <a class="nav-link" href="/cards">Cards <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item {{ Request::is('examples') ? 'active' : '' }}">
                     <a class="nav-link" href="/examples">Examples <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item {{ Request::is('labels') ? 'active' : '' }}">
-                    <a class="nav-link" href="/labels">Labels <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item {{ Request::is('quiz') ? 'active' : '' }}">
                     <a class="nav-link" href="/quiz">Quiz <span class="sr-only">(current)</span></a>

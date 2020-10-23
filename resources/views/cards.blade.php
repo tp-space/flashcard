@@ -32,6 +32,7 @@
                 <th>Symbol</th>
                 <th>Pinyin</th>
                 <th>Translation</th>
+                <th>Comment</th>
                 <th class="text-center">Labels</th>
                 <th class="text-center">Examples</th>
                 <th class="text-center">Actions</th>
@@ -44,6 +45,7 @@
                 <td tp_item="tp_symbol" data-toggle="tooltip" title="{{ $card->id }}">{{ $card->symbol }}</td>
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
+                <td tp_item="tp_comment">{{ $card->comment }}</td>
                 <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}" class="text-center"> 
                     <a href="/filter/card/{{ $card->id }}/labels"
                         data-toggle="tooltip"
@@ -119,6 +121,12 @@
                         <input type="text" class="form-control" id="tp_translation" placeholder="Enter the translation" name="tp_translation" required>
                         <div class="invalid-feedback">Please fill out this field.</div>
                     </div>
+
+                    <div class="form-group">
+                        <label for="tp_comment">Comment:</label>
+                        <input type="text" class="form-control" id="tp_comment" placeholder="Enter the comment" name="tp_comment">
+                    </div>
+
 
 
                     <div class="form-group">
@@ -260,6 +268,7 @@
                 $('#tp_modal_card #tp_symbol').val('');
                 $('#tp_modal_card #tp_pinyin').val('');
                 $('#tp_modal_card #tp_translation').val('');
+                $('#tp_modal_card #tp_comment').val('');
                 $('#tp_modal_card #tp_labels').val([]).change();
                 $('#tp_modal_card #tp_examples').val([]).change();
 
@@ -269,7 +278,7 @@
 
                 // get card id
                 var el_tr = $(button).parent().parent();
-                var id = el_tr.find('[tp_item="tp_id"]').html();
+                var id = el_tr.data('id');
 
                 // configure modal form
                 $('#tp_modal_title').html('Edit Card');
@@ -277,10 +286,10 @@
                 $('#tp_modal_card_form').attr('action', '/cards/' + id);
 
                 // code block
-                $('#tp_modal_card #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                $('#tp_modal_card #tp_comment').val(el_tr.find('[tp_item="tp_comment"]').html());
                 $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change();
                 $('#tp_modal_card #tp_examples').val(JSON.parse(el_tr.find('[tp_item="tp_examples"]').attr('tp_value'))).change();
 
@@ -297,6 +306,7 @@
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
+                $('#tp_modal_card #tp_comment').val(el_tr.find('[tp_item="tp_comment"]').html());
                 $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change();
                 $('#tp_modal_card #tp_examples').val(JSON.parse(el_tr.find('[tp_item="tp_examples"]').attr('tp_value'))).change();
 
@@ -315,7 +325,7 @@
             // get card id
             var button = $(event.relatedTarget);
             var el_tr = $(button).parent().parent();
-            id = el_tr.find('[tp_item="tp_id"]').html();
+            id = el_tr.data('id');
 
             // update modal form content
             $('#tp_modal_card_delete_form').attr('action', '/cards/' + id);

@@ -16,8 +16,8 @@ class CardController extends Controller
         $data->symbol = $request->get("tp_symbol","<unknown>");
         $data->pinyin = $request->get("tp_pinyin","<unknown>");
         $data->translation = $request->get("tp_translation","<unknown>");
+        $data->comment = $request->get("tp_comment","<unknown>");
         $data->example = "";
-        $data->comment = "";
         $data->done = False;
 
         return $data;

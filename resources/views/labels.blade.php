@@ -197,9 +197,7 @@
 
             // get operation from button that triggered the modal form
             var button = $(event.relatedTarget);
-            console.log(button);
             var op = button.data('op');
-            console.log(op);
 
             switch(op) {
             case "new":
@@ -218,7 +216,7 @@
 
                 // get label id
                 var el_tr = $(button).parent().parent();
-                var id = el_tr.find('[tp_item="tp_id"]').html();
+                var id = el_tr.data('id');
 
                 // configure modal form
                 $('#tp_modal_title').html('Edit Label');
@@ -226,7 +224,6 @@
                 $('#tp_modal_label_form').attr('action', '/labels/' + id);
 
                 // code block
-                $('#tp_modal_label #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
                 $('#tp_modal_label #tp_label').val(el_tr.find('[tp_item="tp_label"]').html());
                 $('#tp_modal_label #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
 
@@ -244,6 +241,7 @@
                 $('#tp_modal_label #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
 
                 break;
+
             default:
 
                 // code block
@@ -257,7 +255,7 @@
             // get label id
             var button = $(event.relatedTarget);
             var el_tr = $(button).parent().parent();
-            id = el_tr.find('[tp_item="tp_id"]').html();
+            id = el_tr.data('id');
 
             // update modal form content
             $('#tp_modal_label_delete_form').attr('action', '/labels/' + id);

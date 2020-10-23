@@ -149,7 +149,7 @@ class ExampleController extends Controller
         // update relationship
         $example->cards()->detach();
 
-        return redirect('/examples')->with('success', 'Example "' . $example->symbol . '" has been deleted');
+        return redirect('/examples')->with('success', 'Example "' . $example->example . '" has been deleted');
 
     }
 }

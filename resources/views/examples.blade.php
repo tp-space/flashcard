@@ -219,9 +219,7 @@
 
             // get operation from button that triggered the modal form
             var button = $(event.relatedTarget);
-            console.log(button);
             var op = button.data('op');
-            console.log(op);
 
             switch(op) {
             case "new":
@@ -241,7 +239,7 @@
 
                 // get example id
                 var el_tr = $(button).parent().parent();
-                var id = el_tr.find('[tp_item="tp_id"]').html();
+                var id = el_tr.data('id');
 
                 // configure modal form
                 $('#tp_modal_title').html('Edit Example');
@@ -249,7 +247,6 @@
                 $('#tp_modal_example_form').attr('action', '/examples/' + id);
 
                 // code block
-                $('#tp_modal_example #tp_id').val(el_tr.find('[tp_item="tp_id"]').html());
                 $('#tp_modal_example #tp_example').val(el_tr.find('[tp_item="tp_example"]').html());
                 $('#tp_modal_example #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_example #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
@@ -271,6 +268,7 @@
                 $('#tp_modal_example #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
 
                 break;
+
             default:
 
                 // code block
@@ -284,7 +282,7 @@
             // get example id
             var button = $(event.relatedTarget);
             var el_tr = $(button).parent().parent();
-            id = el_tr.find('[tp_item="tp_id"]').html();
+            id = el_tr.data('id');
 
             // update modal form content
             $('#tp_modal_example_delete_form').attr('action', '/examples/' + id);
