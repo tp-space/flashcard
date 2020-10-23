@@ -25,26 +25,26 @@
 
         </div>
     </div>
-    <table id="tp_card_table" class="display">
+    <table id="tp_card_table" class="display" style="width:100%;">
         <thead>
             <tr>
-                <th>Card ID</th>
+                <th>ID</th>
                 <th>Symbol</th>
                 <th>Pinyin</th>
                 <th>Translation</th>
-                <th>Labels</th>
-                <th>Examples</th>
-                <th>Actions</th>
+                <th class="text-center">Labels</th>
+                <th class="text-center">Examples</th>
+                <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($cards as $card)
             <tr id="tp_tr_{{ $card->id }}" data-id="{{ $card->id }}">
                 <td tp_item="tp_id">{{ $card->id }}</td>
-                <td tp_item="tp_symbol">{{ $card->symbol }}</td>
+                <td tp_item="tp_symbol" data-toggle="tooltip" title="{{ $card->id }}">{{ $card->symbol }}</td>
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
-                <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}"> 
+                <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}" class="text-center"> 
                     <a href="/filter/card/{{ $card->id }}/labels"
                         data-toggle="tooltip"
                         data-html="true"
@@ -54,7 +54,7 @@
                     
                     </a>
                 </td>
-                <td tp_item="tp_examples" tp_value="{{ json_encode($card->examples->pluck('id')) }}"> 
+                <td tp_item="tp_examples" tp_value="{{ json_encode($card->examples->pluck('id')) }}" class="text-center"> 
                     <a href="/filter/card/{{ $card->id }}/examples"
                         data-toggle="tooltip"
                         data-html="true"
@@ -64,7 +64,7 @@
                     
                     </a>
                 </td>
-                <td>
+                <td class="text-center">
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
                         <i class="fa fa-edit"></i>
                     </button>
@@ -221,8 +221,9 @@
             $('[data-toggle="tooltip"]').tooltip();
 
             var table = $('#tp_card_table').DataTable({
-                "order": [[ 0, "desc" ]],
-                "initComplete": function(settings, json, card_id) {
+                order: [[ 0, "desc" ]],
+                columnDefs: [{ visible: false, targets: 0 }],
+                initComplete: function(settings, json, card_id) {
 
                     var card_id = $('#tp_const').data('card_id');
 

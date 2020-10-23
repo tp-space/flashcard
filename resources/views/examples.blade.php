@@ -26,23 +26,23 @@
         </div>
     </div>
 
-    <table id="tp_example_table" class="display">
+    <table id="tp_example_table" class="display" style="width:100%;">
         <thead>
             <tr>
-                <th>Example ID</th>
+                <th>ID</th>
                 <th>Example</th>
                 <th>Translation</th>
-                <th>Cards</th>
-                <th>Actions</th>
+                <th class="text-center">Cards</th>
+                <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($examples as $example)
             <tr id="tp_tr_{{ $example->id }}" data-id="{{ $example->id }}">
                 <td tp_item="tp_id">{{ $example->id }}</td>
-                <td tp_item="tp_example">{{ $example->example }}</td>
+                <td tp_item="tp_example" data-toggle="tooltip" title="{{ $example->id }}">{{ $example->example }}</td>
                 <td tp_item="tp_translation">{{ $example->translation }}</td>
-                <td tp_item="tp_cards" tp_value="{{ $example->cards->pluck('id') }}">
+                <td tp_item="tp_cards" tp_value="{{ $example->cards->pluck('id') }}" class="text-center">
                     <a 
                         href="/filter/example/{{ $example->id }}/cards"
                         data-toggle="tooltip"
@@ -53,7 +53,7 @@
 
                     </a>
                 </td>
-                <td>
+                <td class="text-center">
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_example" data-op="edit">
                         <i class="fa fa-edit"></i>
                     </button>
@@ -194,8 +194,9 @@
             $('[data-toggle="tooltip"]').tooltip();
 
             var table = $('#tp_example_table').DataTable({
-                "order": [[ 0, "desc" ]],
-                "initComplete": function(settings, json, example_id) {
+                order: [[ 0, "desc" ]],
+                columnDefs: [{ visible: false, targets: 0 }],
+                initComplete: function(settings, json, example_id) {
 
                     var example_id = $('#tp_const').data('example_id');
 

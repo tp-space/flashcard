@@ -26,21 +26,21 @@
         </div>
     </div>
 
-    <table id="tp_label_table" class="display">
+    <table id="tp_label_table" class="display" style="width: 100%;">
         <thead>
             <tr>
-                <th>Label ID</th>
+                <th>ID</th>
                 <th>Label name</th>
-                <th>Cards</th>
-                <th>Actions</th>
+                <th class="text-center">Cards</th>
+                <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($labels as $label)
             <tr id="tp_tr_{{ $label->id }}" data-id="{{ $label->id }}">
                 <td tp_item="tp_id">{{ $label->id }}</td>
-                <td tp_item="tp_label">{{ $label->label }}</td>
-                <td tp_item="tp_cards" tp_value="{{ $label->cards->pluck('id') }}">
+                <td tp_item="tp_label" data-toggle="tooltip" title="{{ $label->id }}">{{ $label->label }}</td>
+                <td tp_item="tp_cards" tp_value="{{ $label->cards->pluck('id') }}" class="text-center">
                     <a 
                         href="/filter/label/{{ $label->id }}/cards"
                         data-toggle="tooltip"
@@ -51,7 +51,7 @@
 
                      </a>
                 </td>
-                <td>
+                <td class="text-center">
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_label" data-op="edit">
                         <i class="fa fa-edit"></i>
                     </button>
@@ -173,8 +173,9 @@
             $('[data-toggle="tooltip"]').tooltip();
 
             var table = $('#tp_label_table').DataTable({
-                "order": [[ 0, "desc" ]],
-                "initComplete": function(settings, json, label_id) {
+                order: [[ 0, "desc" ]],
+                columnDefs: [{ visible: false, targets: 0 }],
+                initComplete: function(settings, json, label_id) {
 
                     var label_id = $('#tp_const').data('label_id');
 
