@@ -22,12 +22,12 @@ class LabelController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
 
         // extract filter
-        $labelIds = $request->session()->get('filter_label_ids', []);
-        $cardIds = $request->session()->get('filter_card_ids', []);
+        $labelIds = session()->get('filter_label_ids', []);
+        $cardIds = session()->get('filter_card_ids', []);
 
         // get labels
         $labels = Label::with('cards');
@@ -76,6 +76,9 @@ class LabelController extends Controller
         // update relationship
         $label->cards()->sync($request->get("tp_cards", "[]"));
 
+        // clear session filters
+        FilterController::sessionClearFilter();
+
         return redirect('/labels/' . $label->id)->with('success', 'New "' .  $label->label .'" label has been added');
     }
 
@@ -85,10 +88,10 @@ class LabelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show($id)
     {
         session(['label_id' => $id]);
-        return $this->index($request);
+        return $this->index();
     }
 
     /**
@@ -117,6 +120,9 @@ class LabelController extends Controller
 
         // update relationship
         $label->cards()->sync($request->get("tp_cards", "[]"));
+
+        // clear session filters
+        FilterController::sessionClearFilter();
 
         return redirect('/labels/' . $id)->with('success', 'Label "' . $label->label . '" has been changed');
     }

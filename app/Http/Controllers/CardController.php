@@ -28,12 +28,12 @@ class CardController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
         // extract filter
-        $cardIds = $request->session()->get('filter_card_ids', []);
-        $labelIds = $request->session()->get('filter_label_ids', []);
-        $exampleIds = $request->session()->get('filter_example_ids', []);
+        $cardIds = session()->get('filter_card_ids', []);
+        $labelIds = session()->get('filter_label_ids', []);
+        $exampleIds = session()->get('filter_example_ids', []);
 
         // get cards
         $cards = Card::with('labels')->with('examples');
@@ -90,6 +90,9 @@ class CardController extends Controller
         $card->labels()->sync($request->get("tp_labels", "[]"));
         $card->examples()->sync($request->get("tp_examples", "[]"));
 
+        // clear session filters
+        FilterController::sessionClearFilter();
+
         return redirect('/cards/' . $card->id)->with('success', 'New card "' . $card->symbol . '" has been added');
 
     }
@@ -100,11 +103,11 @@ class CardController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show($id)
     {
 
         session(['card_id' => $id]);
-        return $this->index($request);
+        return $this->index();
 
     }
 
@@ -136,6 +139,9 @@ class CardController extends Controller
         // update relationship
         $card->labels()->sync($request->get("tp_labels", "[]"));
         $card->examples()->sync($request->get("tp_examples", "[]"));
+
+        // clear session filters
+        FilterController::sessionClearFilter();
 
         return redirect('/cards/' . $id)->with('success', 'Card "' . $card->symbol . '" has been changed');
 

@@ -6,15 +6,20 @@ use Illuminate\Http\Request;
 
 class FilterController extends Controller
 {
-    //
-    public function setSingleFilter($source, $id, $target)
-    {
-        // clear all filters
+
+    public static function sessionClearFilter(){
         session([
             'filter_card_ids' => [],
             'filter_label_ids' => [],
             'filter_example_ids' => [],
         ]);
+    }
+
+    public function setSingleFilter($source, $id, $target)
+    {
+
+        // clear all filters
+        self::sessionClearFilter();
 
         // set the selected filter
         $var = 'filter_' . $source .  '_ids';
@@ -25,11 +30,9 @@ class FilterController extends Controller
 
     public function clearAllFilters(Request $request){
 
-        session([
-            'filter_card_ids' => [],
-            'filter_label_ids' => [],
-            'filter_example_ids' => [],
-        ]);
+
+        // clear all filters
+        self::sessionClearFilter();
 
         return redirect($request->get('tp_url'));
     }
@@ -40,7 +43,6 @@ class FilterController extends Controller
         $labelIds = $request->get('tp_filter_label', []);
         $exampleIds = $request->get('tp_filter_example', []);
 
-        error_log(json_encode($labelIds));
         session([
             'filter_card_ids' => $cardIds,
             'filter_label_ids' => $labelIds,

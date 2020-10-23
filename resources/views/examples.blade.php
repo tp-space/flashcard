@@ -38,13 +38,20 @@
         </thead>
         <tbody>
             @foreach ($examples as $example)
-            <tr>
+            <tr id="tp_tr_{{ $example->id }}" data-id="{{ $example->id }}">
                 <td tp_item="tp_id">{{ $example->id }}</td>
                 <td tp_item="tp_example">{{ $example->example }}</td>
                 <td tp_item="tp_translation">{{ $example->translation }}</td>
                 <td tp_item="tp_cards" tp_value="{{ $example->cards->pluck('id') }}">
-                    {{ implode(', ', $example->cards->pluck('symbol')->toArray()) }}
-                    <a href="/filter/example/{{ $example->id }}/cards">({{ $example->cards->count() }})</a>
+                    <a 
+                        href="/filter/example/{{ $example->id }}/cards"
+                        data-toggle="tooltip"
+                        data-html="true"
+                        title="{{ implode('<br>', $example->cards->pluck('symbol')->toArray()) }}">
+
+                        {{ $example->cards->count() }}
+
+                    </a>
                 </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_example" data-op="edit">
@@ -182,6 +189,9 @@
 
             // initialize dropdown for labels
             $('#tp_cards').selectpicker();
+
+            // initialize tooltip
+            $('[data-toggle="tooltip"]').tooltip();
 
             var table = $('#tp_example_table').DataTable({
                 "order": [[ 0, "desc" ]],

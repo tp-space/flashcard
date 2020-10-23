@@ -41,8 +41,15 @@
                 <td tp_item="tp_id">{{ $label->id }}</td>
                 <td tp_item="tp_label">{{ $label->label }}</td>
                 <td tp_item="tp_cards" tp_value="{{ $label->cards->pluck('id') }}">
-                    {{ implode(', ', $label->cards->pluck('symbol')->toArray()) }}
-                    <a href="/filter/label/{{ $label->id }}/cards">({{ $label->cards->count() }})</a>
+                    <a 
+                        href="/filter/label/{{ $label->id }}/cards"
+                        data-toggle="tooltip"
+                        data-html="true"
+                        title="{{ implode('<br>', $label->cards->pluck('symbol')->toArray()) }}">
+
+                        {{ $label->cards->count() }}
+
+                     </a>
                 </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_label" data-op="edit">
@@ -161,6 +168,9 @@
 
             // initialize dropdown for labels
             $('#tp_cards').selectpicker();
+
+            // initialize tooltip
+            $('[data-toggle="tooltip"]').tooltip();
 
             var table = $('#tp_label_table').DataTable({
                 "order": [[ 0, "desc" ]],

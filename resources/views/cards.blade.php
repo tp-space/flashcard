@@ -45,12 +45,24 @@
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
                 <td tp_item="tp_labels" tp_value="{{ json_encode($card->labels->pluck('id')) }}"> 
-                    {{ implode(', ', $card->labels->pluck('label')->toArray()) }}
-                    <a href="/filter/card/{{ $card->id }}/labels">({{ $card->labels->count() }})</a>
+                    <a href="/filter/card/{{ $card->id }}/labels"
+                        data-toggle="tooltip"
+                        data-html="true"
+                        title="{{ implode('<br>', $card->labels->pluck('label')->toArray()) }}">
+                        
+                        {{ $card->labels->count() }}
+                    
+                    </a>
                 </td>
                 <td tp_item="tp_examples" tp_value="{{ json_encode($card->examples->pluck('id')) }}"> 
-                    {{ implode(', ', $card->examples->pluck('example')->toArray()) }}
-                    <a href="/filter/card/{{ $card->id }}/examples">({{ $card->examples->count() }})</a>
+                    <a href="/filter/card/{{ $card->id }}/examples"
+                        data-toggle="tooltip"
+                        data-html="true"
+                        title="{{ implode('<br>', $card->examples->pluck('example')->toArray()) }}">
+
+                        {{ $card->examples->count() }}
+                    
+                    </a>
                 </td>
                 <td>
                     <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
@@ -204,6 +216,9 @@
             // initialize dropdown for labels
             $('#tp_labels').selectpicker();
             $('#tp_examples').selectpicker();
+
+            // initialize tooltip
+            $('[data-toggle="tooltip"]').tooltip();
 
             var table = $('#tp_card_table').DataTable({
                 "order": [[ 0, "desc" ]],

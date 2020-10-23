@@ -24,11 +24,11 @@ class ExampleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index()
     {
         // extract filter
-        $exampleIds = $request->session()->get('filter_example_ids', []);
-        $cardIds = $request->session()->get('filter_card_ids', []);
+        $exampleIds = session()->get('filter_example_ids', []);
+        $cardIds = session()->get('filter_card_ids', []);
 
         // get examples
         $examples = Example::with('cards');
@@ -77,6 +77,9 @@ class ExampleController extends Controller
         // update relationship
         $example->cards()->sync($request->get("tp_cards", "[]"));
 
+        // clear session filters
+        FilterController::sessionClearFilter();
+
         return redirect('/examples/' . $example->id)
             ->with('success', 'New example "' . $example->example . '" has been added');
 
@@ -88,11 +91,11 @@ class ExampleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, $id)
+    public function show($id)
     {
 
         session(['example_id' => $id]);
-        return $this->index($request);
+        return $this->index();
 
     }
 
@@ -123,6 +126,9 @@ class ExampleController extends Controller
 
         // update relationship
         $example->cards()->sync($request->get("tp_cards", "[]"));
+
+        // clear session filters
+        FilterController::sessionClearFilter();
 
         return redirect('/examples/' . $id)
             ->with('success', 'Example "' . $example->example . '" has been changed');
