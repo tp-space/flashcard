@@ -41,14 +41,8 @@
                 <td tp_item="tp_id">{{ $label->id }}</td>
                 <td tp_item="tp_label" data-toggle="tooltip" title="{{ $label->id }}">{{ $label->label }}</td>
                 <td tp_item="tp_cards" tp_value="{{ $label->cards->pluck('id') }}" class="text-center">
-                    <a 
-                        href="/filter/label/{{ $label->id }}/cards"
-                        data-toggle="tooltip"
-                        data-html="true"
-                        title="{{ implode('<br>', $label->cards->pluck('symbol')->toArray()) }}">
-
+                    <a href="/filter/label/{{ $label->id }}/cards">
                         {{ $label->cards->count() }}
-
                      </a>
                 </td>
                 <td class="text-center">
