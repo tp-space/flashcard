@@ -5,6 +5,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\LabelController;
 use App\Http\Controllers\ExampleController;
 use App\Http\Controllers\FilterController;
+use App\Http\Controllers\QuizController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,11 +25,8 @@ Route::get('/', function () { return redirect('/cards'); });
 Route::resource('cards', CardController::class);
 Route::resource('labels', LabelController::class);
 Route::resource('examples', ExampleController::class);
+Route::resource('quiz', QuizController::class);
 
 // Set routes for filtering
 Route::get('/filter/{source}/{id}/{target}', [FilterController::class, 'setSingleFilter']);
 Route::post('/filter', [FilterController::class, 'setAllFilters']);
-
-// set route for quiz
-Route::get('/quiz', function () { return view('quiz'); });
-
