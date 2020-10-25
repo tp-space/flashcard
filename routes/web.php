@@ -25,8 +25,13 @@ Route::get('/', function () { return redirect('/cards'); });
 Route::resource('cards', CardController::class);
 Route::resource('labels', LabelController::class);
 Route::resource('examples', ExampleController::class);
-Route::resource('quiz', QuizController::class);
 
 // Set routes for filtering
 Route::get('/filter/{source}/{id}/{target}', [FilterController::class, 'setSingleFilter']);
 Route::post('/filter', [FilterController::class, 'setAllFilters']);
+
+// set routes for quiz
+Route::get('/quiz', [QuizController::class, 'index']);
+Route::get('/quiz/done/{id}', [QuizController::class, 'setDone']);
+Route::get('/quiz/reset', [QuizController::class, 'reset']);
+

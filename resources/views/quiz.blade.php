@@ -10,17 +10,22 @@
 <div id="tp_content" class="container shadow mb-5 mt-5 bg-light rounded" style="display: none;">
 
     <div class="row mt-3 mb-3">
-        <div class="col-md-6 text-md-left">
-            <h1>Quiz</h1>
+        <div class="col-md-6 text-md-left d-flex">
+            <h1>Quiz</h1><h4 class="align-self-center ml-3">({{ $countRemain}}/{{ $countAll }})</h4>
         </div>
         <div class="col-md-6 text-md-right">
-            <button class="btn btn-danger">Reset</button>
+            <a class="btn btn-danger" href="/quiz/reset">Reset</a>
+            @if (isset($card) && $card != null)
             <button class="btn btn-primary">Show/Hide</button>
-            <button class="btn btn-warning">Keep</button>
-            <button class="btn btn-success">Next</button>
+            <a class="btn btn-warning" href="/quiz">Keep</a>
+            <a class="btn btn-success" href="/quiz/done/{{ $card->id }}">Next</a>
+            @endif
         </div>
     </div>
 
+    @if (!isset($card) || $card == null)
+        <span>No cards left</span>
+    @else
     <div class="row mt-3 mb-3">
         <div class="col-md-12 text-md-left">
             <span>{{ implode(", ", $card->labels()->pluck('label')->toArray()) }}</span>
@@ -31,6 +36,9 @@
         <div class="col-md-6" style="height: 400px; background-color:beige;">
         </div>
         <div class="col-md-6" style="background-color:orange;">
+            <div>
+                <i class="fa fa-volume-up"></i>
+            </div>
             <div>
                 <h1>{{ $card->symbol }}</h1>
             </div>
@@ -45,6 +53,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <table id="tp_quiz_table" class="display" style="width:100%;">
         <thead>
@@ -55,17 +64,19 @@
             </tr>
         </thead>
         <tbody>
+        @if (isset($card) && $card != null)
             @foreach ($card->examples as $example)
             <tr>
                 <td>{{ $example->example }}</td>
                 <td >{{ $example->translation }}</td>
                 <td class="text-center">
                     <button class="btn btn-sm">
-                        <i class="fa fa-edit"></i>
+                        <i class="fa fa-volume-up"></i>
                     </button>
                 </td>
             </tr>
             @endforeach
+        @endif
         </tbody>
     </table>
 

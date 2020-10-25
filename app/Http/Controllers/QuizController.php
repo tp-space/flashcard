@@ -34,10 +34,17 @@ class QuizController extends Controller
                 $query->wherein('example.id', $exampleIds); 
             });
         }
-        $cards = $cards->orderBy('id', 'DESC')->get();
+        $countAll = $cards->count();
+        $remain = $cards->where('done', false)->get();
+        $countRemain = count($remain);
         
         // get a single card
-        $card = $cards[1];
+        $card = null;
+        $max = count($remain);
+        if ($max > 0) {
+            $select = random_int(0,$max-1);
+            $card = $remain[$select];
+        }
 
 
         // get data for filters
@@ -45,18 +52,31 @@ class QuizController extends Controller
         $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
         $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
 
-        return view('quiz', compact('card', 'filterCards', 'filterLabels', 'filterExamples'));
+        return view('quiz', compact(
+            'card',
+            'filterCards',
+            'filterLabels',
+            'filterExamples',
+            'countAll',
+            'countRemain',
+        ));
 
     }
 
-    public function update(Request $request, $id)
+    public function setDone($id)
     {
-
         $card = Card::findOrFail($id);
         $card->done = true;
         $card->save();
 
-        return $this->index();
+        return redirect('/quiz');
+    }
 
+    public function reset()
+    {
+
+        Card::where('done', '!=', false)->update(['done' => false]);
+
+        return redirect('/quiz');
     }
 }
