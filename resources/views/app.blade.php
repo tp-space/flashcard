@@ -36,6 +36,23 @@
                                 @csrf
                                 <input name="tp_url" type="hidden" value="{{ Request::url() }}">
 
+                                @php ($sel_labels = Session::get('filter_label_ids', []))
+                                <select 
+                                                       id="tp_filter_label" 
+                                                       name="tp_filter_label[]" 
+                                                       class="selectpicker filter" 
+                                                       title="No labels selected" 
+                                                       onchange="this.form.submit()" 
+                                                       multiple data-live-search="true">
+
+                                    @foreach ($filterLabels as $filterLabel)
+                                    @php ($sel = (in_array($filterLabel->id, $sel_labels) ? 'selected' : ''))
+                                    <option {{ $sel }} value="{{ $filterLabel->id }}">
+                                        {{ $filterLabel->label }}
+                                    </option>
+                                    @endforeach
+                                </select>
+
                                 @php ($sel_cards = Session::get('filter_card_ids', []))
                                 <select 
                                                                    id="tp_filter_card" 
@@ -72,22 +89,6 @@
 
                                 </select>
 
-                                @php ($sel_labels = Session::get('filter_label_ids', []))
-                                <select 
-                                                       id="tp_filter_label" 
-                                                       name="tp_filter_label[]" 
-                                                       class="selectpicker filter" 
-                                                       title="No labels selected" 
-                                                       onchange="this.form.submit()" 
-                                                       multiple data-live-search="true">
-
-                                    @foreach ($filterLabels as $filterLabel)
-                                    @php ($sel = (in_array($filterLabel->id, $sel_labels) ? 'selected' : ''))
-                                    <option {{ $sel }} value="{{ $filterLabel->id }}">
-                                        {{ $filterLabel->label }}
-                                    </option>
-                                    @endforeach
-                                </select>
                             </form>
                         </div>
                         <div class="col-2 text-right">
@@ -95,7 +96,7 @@
                             <form id="tp_filter_clear_form" action="/filter" method="POST">
                                 @csrf
                                 <input name="tp_url" type="hidden" value="{{ Request::url() }}">
-                                <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i></button>
+                                <button type="submit" title="Clear Filter" class="btn btn-primary"><i class="fa fa-filter"></i></button>
                             </form>
 
                         </div>

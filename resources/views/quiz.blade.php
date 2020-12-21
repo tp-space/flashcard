@@ -14,11 +14,11 @@
             <h1>Quiz</h1><h4 class="align-self-center ml-3">({{ $countRemain}}/{{ $countAll }})</h4>
         </div>
         <div class="col-md-6 text-md-right">
-            <a class="btn btn-danger" href="/quiz/reset">Reset</a>
+            <a class="btn btn-danger" title="Put all cards back into the stack" href="/quiz/reset">Reset</a>
             @if (isset($card) && $card != null)
-            <button class="btn btn-primary">Show/Hide</button>
-            <a class="btn btn-warning" href="/quiz">Keep</a>
-            <a class="btn btn-success" href="/quiz/done/{{ $card->id }}">Next</a>
+            <button title="Hide card info" class="btn btn-primary fc_show_hide">Hide</button>
+            <a class="btn btn-warning" title="Keep card in stack" href="/quiz">Keep</a>
+            <a class="btn btn-success" title="Remove card from stack" href="/quiz/done/{{ $card->id }}">Next</a>
             @endif
         </div>
     </div>
@@ -95,6 +95,18 @@
                     $('#tp_content').show();
                 }
             });
+
+        });
+
+        $(document).on('click', '.fc_show_hide', function (event) {
+
+            if ($(this).text() == 'Show'){
+                $(this).text('Hide');
+                $(this).attr('title', 'Hide card information');
+            } else {
+                $(this).text('Show');
+                $(this).attr('title', 'Show card information');
+            }
 
         });
     </script>

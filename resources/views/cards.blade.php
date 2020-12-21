@@ -19,7 +19,13 @@
         <div class="col-md-6 text-md-right">
 
             <!-- Button New -->
-            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#tp_modal_card" data-op="new">
+            <button 
+                type="button" 
+                title="Add new card"
+                class="btn btn-success" 
+                data-toggle="modal" 
+                data-target="#tp_modal_card" 
+                data-op="new">
                 <i class="fa fa-plus"></i>
             </button>
 
@@ -67,13 +73,13 @@
                     </a>
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
+                    <button class="btn btn-sm" title="Edit card" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
                         <i class="fa fa-edit"></i>
                     </button>
-                    <button class="btn btn-sm" data-toggle="modal" data-target="#tp_modal_card" data-op="clone">
+                    <button class="btn btn-sm" title="Clone card" data-toggle="modal" data-target="#tp_modal_card" data-op="clone">
                         <i class="fa fa-clone"></i>
                     </button>
-                    <button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#tp_modal_card_delete">
+                    <button class="btn btn-sm btn-danger" title="Delete card" data-toggle="modal" data-target="#tp_modal_card_delete">
                         <i class="fa fa-trash"></i>
                     </button>
                 </td>
