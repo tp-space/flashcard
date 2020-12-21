@@ -95,10 +95,17 @@
                         </div>
                         <div class="col-2 text-right">
 
+                            @php ($hasFilter = (count($sel_cards) + count($sel_labels) + count($sel_examples) > 0))
                             <form id="tp_filter_clear_form" action="/filter" method="POST">
                                 @csrf
                                 <input name="tp_url" type="hidden" value="{{ Request::url() }}">
-                                <button type="submit" title="Clear Filter" class="btn btn-primary"><i class="fa fa-filter"></i></button>
+                                <button 
+                                    type="submit" 
+                                    title="Clear Filter" 
+                                    class="btn btn-primary"
+                                    {{ $hasFilter ? '' : 'disabled="disabled"' }}
+                                    >
+                                <i class="fa fa-filter"></i></button>
                             </form>
 
                         </div>

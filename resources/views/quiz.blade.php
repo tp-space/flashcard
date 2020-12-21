@@ -29,7 +29,7 @@
     <div class="row mt-3 mb-3">
         <div class="col-md-12 text-md-left">
             <button 
-                id="fc-labels" data-state="{{ Session::get('quiz-labels', true) ? 'on' : 'off' }}" 
+                id="fc-labels" data-state="{{ Session::get('fc-labels', 'off') }}" 
                 class="btn btn-sm fc-toggle-icon">
                 <i class="fa"></i>
             </button>
@@ -45,7 +45,7 @@
         <div class="col-md-6" style="background-color:orange;">
             <div>
                 <button 
-                    id="fc-card-tts" data-state="{{ Session::get('quiz-card-tts', true) ? 'on' : 'off' }}" 
+                    id="fc-card-tts" data-state="{{ Session::get('fc-card-tts', 'off') }}" 
                     class="btn btn-sm fc-toggle-icon">
                     <i class="fa"></i>
                 </button>
@@ -53,7 +53,7 @@
             </div>
             <div>
                 <button 
-                    id="fc-symbol" data-state="{{ Session::get('quiz-symbol', true) ? 'on' : 'off' }}" 
+                    id="fc-symbol" data-state="{{ Session::get('fc-symbol', 'off') }}" 
                     class="btn btn-sm fc-toggle-icon">
                     <i class="fa"></i>
                 </button>
@@ -61,7 +61,7 @@
             </div>
             <div>
                 <button 
-                    id="fc-pinyin" data-state="{{ Session::get('quiz-pinyin', true) ? 'on' : 'off' }}" 
+                    id="fc-pinyin" data-state="{{ Session::get('fc-pinyin', 'off') }}" 
                     class="btn btn-sm fc-toggle-icon">
                     <i class="fa"></i>
                 </button>
@@ -71,7 +71,7 @@
             </div>
             <div>
                 <button 
-                    id="fc-translation" data-state="{{ Session::get('quiz-translation', true) ? 'on' : 'off' }}"
+                    id="fc-translation" data-state="{{ Session::get('fc-translation', 'off') }}"
                     class="btn btn-sm fc-toggle-icon">
                     <i class="fa"></i>
                 </button>
@@ -81,7 +81,7 @@
             </div>
             <div>
                 <button 
-                    id="fc-comment" data-state="{{ Session::get('quiz-comment', true) ? 'on' : 'off' }}" 
+                    id="fc-comment" data-state="{{ Session::get('fc-comment', 'off') }}" 
                     class="btn btn-sm fc-toggle-icon">
                     <i class="fa"></i>
                 </button>
@@ -93,11 +93,14 @@
     </div>
     @endif
 
+    @if (isset($card) && $card != null)
     <button 
-       id="fc-examples" data-state="{{ Session::get('quiz-examples', true) ? 'on' : 'off' }}" 
+       id="fc-examples" data-state="{{ Session::get('fc-examples', 'off') }}" 
        class="btn btn-sm fc-toggle-icon">
         <i class="fa"></i>
     </button>
+    @endif
+
     <div id="fc-examples-item" style="display: none;">
         <table id="tp_quiz_table" class="display" style="width:100%;">
             <thead>
@@ -161,14 +164,17 @@
 
         $(document).on('click', '.fc-toggle-icon', function (event) {
 
-            oldState =$(this).data('state');
-            $(this).data('state', oldState == 'on' ? 'off' : 'on');
+            newState = ($(this).data('state') == 'on' ? 'off' : 'on');
+            $(this).data('state', newState);
 
             $.ajax({
             type: 'POST',
                 url: '/quiz/update_state',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                data: { key: 'quiz-labels', state: 'on'} ,
+                data: { 
+                    key: $(this).attr('id'), 
+                    state: newState
+                } ,
                 success: function(data, status){console.log(data,status)},
             })
 

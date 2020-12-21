@@ -80,10 +80,17 @@ class QuizController extends Controller
         return redirect('/quiz');
     }
 
-    public function updateState(){
+    public function updateState(Request $request){
 
+        $key = $request->input('key');
+        $state = $request->input('state');
+
+        session([
+            $key => $state
+        ]);
         return [
-            'success' => 'true',
+            'status' => 'success',
+            'data' => []
         ];
     }
 }
