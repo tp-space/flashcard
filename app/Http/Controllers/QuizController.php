@@ -79,4 +79,11 @@ class QuizController extends Controller
 
         return redirect('/quiz');
     }
+
+    public function updateState(){
+
+        return [
+            'success' => 'true',
+        ];
+    }
 }

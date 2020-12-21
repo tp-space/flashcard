@@ -35,3 +35,5 @@ Route::get('/quiz', [QuizController::class, 'index']);
 Route::get('/quiz/done/{id}', [QuizController::class, 'setDone']);
 Route::get('/quiz/reset', [QuizController::class, 'reset']);
 
+// set routes for quiz state
+Route::post('/quiz/update_state', [QuizController::class, 'updateState']);

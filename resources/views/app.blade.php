@@ -4,6 +4,8 @@
 		<meta charset="UTF-8">
 		<!-- <link rel="stylesheet" href="{{ asset('css/app.css') }}"> -->
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}"/>
+
 		<title>{{ config('app.name') }}</title>
 
         <!-- CSS only -->
@@ -126,7 +128,7 @@
 		@include('footer')
 
         <!-- JS, Popper.js, and jQuery -->
-        <script src="/comp/jquery/jquery.slim.min.js"></script>
+        <script src="/comp/jquery/jquery.min.js"></script>
         <script src="/comp/popperjs/umd/popper.min.js"></script>
         <script src="/comp/bootstrap/js/bootstrap.min.js"></script>
 

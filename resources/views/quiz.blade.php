@@ -16,7 +16,7 @@
         <div class="col-md-6 text-md-right">
             <a class="btn btn-danger" title="Put all cards back into the stack" href="/quiz/reset">Reset</a>
             @if (isset($card) && $card != null)
-            <button title="Hide card info" class="btn btn-primary fc_show_hide">Hide</button>
+            <button id="fc-show-hide" title="Show card info" class="btn btn-primary fc-show-hide">Show</button>
             <a class="btn btn-warning" title="Keep card in stack" href="/quiz">Keep</a>
             <a class="btn btn-success" title="Remove card from stack" href="/quiz/done/{{ $card->id }}">Next</a>
             @endif
@@ -28,7 +28,14 @@
     @else
     <div class="row mt-3 mb-3">
         <div class="col-md-12 text-md-left">
-            <span>{{ implode(", ", $card->labels()->pluck('label')->toArray()) }}</span>
+            <button 
+                id="fc-labels" data-state="{{ Session::get('quiz-labels', true) ? 'on' : 'off' }}" 
+                class="btn btn-sm fc-toggle-icon">
+                <i class="fa"></i>
+            </button>
+            <span id="fc-labels-item" style="display: none;">
+                {{ implode(", ", $card->labels()->pluck('label')->toArray()) }}
+            </span>
         </div>
     </div>
 
@@ -37,48 +44,86 @@
         </div>
         <div class="col-md-6" style="background-color:orange;">
             <div>
-                <i class="fa fa-volume-up"></i>
+                <button 
+                    id="fc-card-tts" data-state="{{ Session::get('quiz-card-tts', true) ? 'on' : 'off' }}" 
+                    class="btn btn-sm fc-toggle-icon">
+                    <i class="fa"></i>
+                </button>
+                <i id="fc-card-tts-item" style="display: none;" class="fa fa-volume-up"></i>
             </div>
             <div>
-                <h1>{{ $card->symbol }}</h1>
+                <button 
+                    id="fc-symbol" data-state="{{ Session::get('quiz-symbol', true) ? 'on' : 'off' }}" 
+                    class="btn btn-sm fc-toggle-icon">
+                    <i class="fa"></i>
+                </button>
+                <span id="fc-symbol-item" class="h1" style="display: none;">{{ $card->symbol }}</span>
             </div>
             <div>
-                <span>{{ $card->pinyin }}</span>
+                <button 
+                    id="fc-pinyin" data-state="{{ Session::get('quiz-pinyin', true) ? 'on' : 'off' }}" 
+                    class="btn btn-sm fc-toggle-icon">
+                    <i class="fa"></i>
+                </button>
+                <span id="fc-pinyin-item" style="display: none;">
+                    {{ $card->pinyin }}
+                </span>
             </div>
             <div>
-                <span>{{ $card->translation }}</span>
+                <button 
+                    id="fc-translation" data-state="{{ Session::get('quiz-translation', true) ? 'on' : 'off' }}"
+                    class="btn btn-sm fc-toggle-icon">
+                    <i class="fa"></i>
+                </button>
+                <span id="fc-translation-item" style="display: none;">
+                    {{ $card->translation }}
+                </span>
             </div>
             <div>
-                <span>{{ $card->comment }}</span>
+                <button 
+                    id="fc-comment" data-state="{{ Session::get('quiz-comment', true) ? 'on' : 'off' }}" 
+                    class="btn btn-sm fc-toggle-icon">
+                    <i class="fa"></i>
+                </button>
+                <span id="fc-comment-item" style="display: none;">
+                    {{ $card->comment }}
+                </span>
             </div>
         </div>
     </div>
     @endif
 
-    <table id="tp_quiz_table" class="display" style="width:100%;">
-        <thead>
-            <tr>
-                <th>Example</th>
-                <th>Translation</th>
-                <th class="text-center">Action</th>
-            </tr>
-        </thead>
-        <tbody>
-        @if (isset($card) && $card != null)
-            @foreach ($card->examples as $example)
-            <tr>
-                <td>{{ $example->example }}</td>
-                <td >{{ $example->translation }}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm">
-                        <i class="fa fa-volume-up"></i>
-                    </button>
-                </td>
-            </tr>
-            @endforeach
-        @endif
-        </tbody>
-    </table>
+    <button 
+       id="fc-examples" data-state="{{ Session::get('quiz-examples', true) ? 'on' : 'off' }}" 
+       class="btn btn-sm fc-toggle-icon">
+        <i class="fa"></i>
+    </button>
+    <div id="fc-examples-item" style="display: none;">
+        <table id="tp_quiz_table" class="display" style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Example</th>
+                    <th>Translation</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            @if (isset($card) && $card != null)
+                @foreach ($card->examples as $example)
+                <tr>
+                    <td>{{ $example->example }}</td>
+                    <td >{{ $example->translation }}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm">
+                            <i class="fa fa-volume-up"></i>
+                        </button>
+                    </td>
+                </tr>
+                @endforeach
+            @endif
+            </tbody>
+        </table>
+    </div>
 
 </div>
 @endsection
@@ -96,9 +141,11 @@
                 }
             });
 
+            refresh_all();
+
         });
 
-        $(document).on('click', '.fc_show_hide', function (event) {
+        $(document).on('click', '.fc-show-hide', function (event) {
 
             if ($(this).text() == 'Show'){
                 $(this).text('Hide');
@@ -108,6 +155,78 @@
                 $(this).attr('title', 'Show card information');
             }
 
+            refresh_all();
+
         });
+
+        $(document).on('click', '.fc-toggle-icon', function (event) {
+
+            oldState =$(this).data('state');
+            $(this).data('state', oldState == 'on' ? 'off' : 'on');
+
+            $.ajax({
+            type: 'POST',
+                url: '/quiz/update_state',
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: { key: 'quiz-labels', state: 'on'} ,
+                success: function(data, status){console.log(data,status)},
+            })
+
+            refresh_all();
+
+        });
+
+        function refresh_all(){
+
+            elem = [
+                'fc-labels', 
+                'fc-card-tts', 
+                'fc-symbol', 
+                'fc-pinyin', 
+                'fc-translation', 
+                'fc-comment', 
+                'fc-examples'
+            ];
+            
+            fcIsShow = ($('#fc-show-hide').text() == 'Hide');
+
+            for (let i = 0; i < elem.length; i++){
+
+                state = $('#' + elem[i]).data('state');
+                btn = $('#' + elem[i]);
+                icon = btn.find('i');
+                span = $('#' + elem[i] + '-item');
+
+                // set correct icon and button color
+                if (state == 'on'){
+                    if (!icon.hasClass('fa-eye-slash')){
+                        icon.removeClass('fa-eye');
+                        icon.addClass('fa-eye-slash');
+                    }
+                    if (!btn.hasClass('btn-success')){
+                        btn.removeClass('btn-warning');
+                        btn.addClass('btn-success');
+                    }
+                } else {
+                    if (!icon.hasClass('fa-eye-eye')){
+                        icon.removeClass('fa-eye-slash');
+                        icon.addClass('fa-eye');
+                    }
+                    if (!btn.hasClass('btn-warning')){
+                        btn.removeClass('btn-success');
+                        btn.addClass('btn-warning');
+                    }
+                }
+
+                // show hide item
+                if (fcIsShow || (state == 'on')){
+                    span.show();
+                } else {
+                    span.hide();
+                }
+            }
+
+        }
+
     </script>
 @endpush
