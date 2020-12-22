@@ -82,6 +82,14 @@
                     <button class="btn btn-sm btn-danger" title="Delete card" data-toggle="modal" data-target="#tp_modal_card_delete">
                         <i class="fa fa-trash"></i>
                     </button>
+                    @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
+                    @if (file_exists($audioPath['full']))
+                    <audio id="fc-card-tts-item" controls="controls">
+                    <source src="{{ $audioPath['url'] }}" type="audio/mp3"></source>
+                    </audio>
+                    @else
+                    <span>No audio file available</span>
+                    @endif
                 </td>
             </tr>
             @endforeach

@@ -20,6 +20,10 @@ class CardController extends Controller
         $data->example = "";
         $data->done = False;
 
+        if (is_null($data->comment)){
+            $data->comment = '';
+        }
+
         return $data;
     }
 
@@ -86,6 +90,9 @@ class CardController extends Controller
         $card = $this->populateRecord($card, $request);
         $card->save();
 
+        // generate audio file
+        AudioController::generateAudioFile(AudioController::CARD, $card->id, $card->symbol);
+
         // update relationship
         $card->labels()->sync($request->get("tp_labels", "[]"));
         $card->examples()->sync($request->get("tp_examples", "[]"));
@@ -134,7 +141,13 @@ class CardController extends Controller
 
         $card = Card::findOrFail($id);
         $card = $this->populateRecord($card, $request);
+        $isDirty = $card->isDirty('symbol');
         $card->save();
+
+        // generate audio file
+        if ($isDirty){
+            AudioController::generateAudioFile(AudioController::CARD, $card->id, $card->symbol);
+        }
 
         // update relationship
         $card->labels()->sync($request->get("tp_labels", "[]"));
@@ -158,6 +171,9 @@ class CardController extends Controller
 
         $card = Card::findOrFail($id);
         $card->delete();
+
+        // Remove audio file
+        AudioController::deleteAudioFile(AudioController::CARD, $card->id);
 
         // update relationship
         $card->labels()->detach();

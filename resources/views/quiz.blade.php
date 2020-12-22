@@ -49,7 +49,14 @@
                     class="btn btn-sm fc-toggle-icon">
                     <i class="fa"></i>
                 </button>
-                <i id="fc-card-tts-item" style="display: none;" class="fa fa-volume-up"></i>
+                @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
+                @if (file_exists($audioPath['full']))
+                <audio id="fc-card-tts-item" style="display: none;" controls="controls" autoplay="autoplay">
+                <source src="{{ $audioPath['url'] }}" type="audio/mp3"></source>
+                </audio>
+                @else
+                <span>No audio file available</span>
+                @endif
             </div>
             <div>
                 <button 
