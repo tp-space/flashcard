@@ -48,7 +48,15 @@
             @foreach ($cards as $card)
             <tr id="tp_tr_{{ $card->id }}" data-id="{{ $card->id }}">
                 <td tp_item="tp_id">{{ $card->id }}</td>
-                <td tp_item="tp_symbol" data-toggle="tooltip" title="{{ $card->id }}">{{ $card->symbol }}</td>
+                <td tp_item="tp_symbol" data-toggle="tooltip" title="{{ $card->id }}">
+                    @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
+                    @if (file_exists($audioPath['full']))
+                    <button class="btn btn-sm btn-primary fc-audio" data-path="{{ $audioPath['url'] }}">
+                        <i class="fa fa-play"></i>
+                    </button>
+                    @endif
+                    {{ $card->symbol }}
+                </td>
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>
                 <td tp_item="tp_comment">{{ $card->comment }}</td>
@@ -73,28 +81,37 @@
                     </a>
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm" title="Edit card" data-toggle="modal" data-target="#tp_modal_card" data-op="edit">
-                        <i class="fa fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm" title="Clone card" data-toggle="modal" data-target="#tp_modal_card" data-op="clone">
-                        <i class="fa fa-clone"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger" title="Delete card" data-toggle="modal" data-target="#tp_modal_card_delete">
-                        <i class="fa fa-trash"></i>
-                    </button>
-                    @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
-                    @if (file_exists($audioPath['full']))
-                    <audio id="fc-card-tts-item" controls="controls">
-                    <source src="{{ $audioPath['url'] }}" type="audio/mp3"></source>
-                    </audio>
-                    @else
-                    <span>No audio file available</span>
-                    @endif
+                    <div class="btn-group">
+                        <button class="btn btn-sm " 
+                            title="Edit card" 
+                            data-toggle="modal" 
+                            data-target="#tp_modal_card" 
+                            data-op="edit">
+                            <i class="fa fa-edit"></i>
+                        </button>
+                        <button 
+                            class="btn btn-sm " 
+                            title="Clone card" 
+                            data-toggle="modal" 
+                            data-target="#tp_modal_card" 
+                            data-op="clone">
+                            <i class="fa fa-clone"></i>
+                        </button>
+                        <button 
+                            class="btn btn-sm btn-danger" 
+                            title="Delete card" 
+                            data-toggle="modal" 
+                            data-target="#tp_modal_card_delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
             @endforeach
         </tbody>
     </table>
+    
+    <audio id="fc-player" style="display: none;" src="" type="audio/mp3"></audio>
 
 </div>
 
@@ -339,13 +356,23 @@
             // get card id
             var button = $(event.relatedTarget);
             var el_tr = $(button).parent().parent();
-            id = el_tr.data('id');
+            var id = el_tr.data('id');
 
             // update modal form content
             $('#tp_modal_card_delete_form').attr('action', '/cards/' + id);
             $('#tp_modal_card_delete_text').html('Do you really want to delete '  + id + '?');
 
         });
+
+        $(document).on('click', '.fc-audio', function (event) {
+
+            var src = $(this).data('path');
+            var audio = document.getElementById('fc-player');
+            audio.setAttribute('src', src);
+            audio.play();
+
+        });
+
     </script>
 @endpush
 

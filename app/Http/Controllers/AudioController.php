@@ -49,30 +49,38 @@ class AudioController extends Controller
         self::checkType($type);
         self::checkId($id);
 
-        $audioContent = file_get_contents('test.mp3');
-        if (false){
-
-            putenv('GOOGLE_APPLICATION_CREDENTIALS=/home/laravel/projects/flashcard/flashcard-4763204aaa06.json');
-
-            /** Uncomment and populate these variables in your code */
-            $text = $symbol;
-
-            // create client object
-            $client = new TextToSpeechClient();
-
-            $input_text = (new SynthesisInput())->setText($text);
-
-            // note: the voice can also be specified by name
-            // names of voices can be retrieved with $client->listVoices()
-            $voice = (new VoiceSelectionParams())->setLanguageCode('cmn-TW')->setSsmlGender(SsmlVoiceGender::FEMALE);
-
-            $audioConfig = (new AudioConfig())->setAudioEncoding(AudioEncoding::MP3);
-
-            $response = $client->synthesizeSpeech($input_text, $voice, $audioConfig);
-            $audioContent = $response->getAudioContent();
-
-            $client->close();
+        $credentials = base_path() . DIRECTORY_SEPARATOR . 
+            env('GOOGLE_APPLICATION_CREDENTIALS', '');
+        
+        // Check if google cloud credential file exists
+        if (!file_exists($credentials)){
+            throw new Exception('Google Cloud Credential missing. ' .
+                'Please check the GOOGLE_APPLICATION_CREDENTIALS variable ' .
+                ' in the .env file');
         }
+
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $credentials);
+
+        /** Uncomment and populate these variables in your code */
+        $text = $symbol;
+
+        // create client object
+        $client = new TextToSpeechClient();
+
+        $input_text = (new SynthesisInput())->setText($text);
+
+        // note: the voice can also be specified by name
+        // names of voices can be retrieved with $client->listVoices()
+        $voice = (new VoiceSelectionParams())
+            ->setLanguageCode('cmn-TW')
+            ->setSsmlGender(SsmlVoiceGender::FEMALE);
+
+        $audioConfig = (new AudioConfig())->setAudioEncoding(AudioEncoding::MP3);
+
+        $response = $client->synthesizeSpeech($input_text, $voice, $audioConfig);
+        $audioContent = $response->getAudioContent();
+
+        $client->close();
 
         // create target folder if not exists
         $folder = self::getTargetFolder();
@@ -85,7 +93,6 @@ class AudioController extends Controller
 
         // store file (overwrites if file already exists)
         file_put_contents($fileName, $audioContent);
-
 
     }
 
