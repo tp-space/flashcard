@@ -308,7 +308,7 @@
             case "edit":
 
                 // get card id
-                var el_tr = $(button).parent().parent();
+                var el_tr = $(button).closest('tr');
                 var id = el_tr.data('id');
 
                 // configure modal form
@@ -333,7 +333,7 @@
                 $('#_method_change').val('POST');
 
                 // code block
-                var el_tr = $(button).parent().parent();
+                var el_tr = $(button).closest('tr');
                 $('#tp_modal_card #tp_symbol').val(el_tr.find('[tp_item="tp_symbol"]').html());
                 $('#tp_modal_card #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_card #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
@@ -355,7 +355,7 @@
 
             // get card id
             var button = $(event.relatedTarget);
-            var el_tr = $(button).parent().parent();
+            var el_tr = $(button).closest('tr');
             var id = el_tr.data('id');
 
             // update modal form content
