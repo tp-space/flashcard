@@ -150,6 +150,17 @@
             $(document).ready( function () {
                 $('.filter').selectpicker();
             });
+
+        $(document).on('click', '.fc-audio', function (event) {
+
+            var src = $(this).data('path');
+            var audio = new Audio(src);
+            audio.load();
+            audio.play();
+            return;
+
+        });
+
         </script>
         @stack('scripts')
 

@@ -29,16 +29,21 @@ class ExampleController extends Controller
         // extract filter
         $exampleIds = session()->get('filter_example_ids', []);
         $cardIds = session()->get('filter_card_ids', []);
+        $labelIds = session()->get('filter_label_ids', []);
 
         // get examples
-        $examples = Example::with('cards');
+        $examples = Example::with(['cards', 'cards.labels']);
         if (count($exampleIds) > 0){
             $examples = $examples->wherein('id', $exampleIds); 
         }
-        if (count($cardIds) > 0)
-        {
+        if (count($cardIds) > 0){
             $examples = $examples->whereHas('cards', function($query) use ($cardIds) {
                 $query->wherein('card.id', $cardIds); 
+            });
+        }
+        if (count($labelIds) > 0){
+            $examples = $examples->whereHas('cards.labels', function($query) use ($labelIds) {
+                $query->wherein('label.id', $labelIds); 
             });
         }
         $examples = $examples->orderBy('id', 'DESC')->get();

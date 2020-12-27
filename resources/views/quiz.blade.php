@@ -50,10 +50,14 @@
                     <i class="fa"></i>
                 </button>
                 @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
-                @if (file_exists($audioPath['full']))
-                <audio id="fc-card-tts-item" style="display: none;" controls="controls" autoplay="autoplay">
-                <source src="{{ $audioPath['url'] }}" type="audio/mp3"></source>
-                </audio>
+                @if (file_exists($audioPath['fs']))
+                    <button 
+                        id="fc-card-tts-item" 
+                        class="btn btn-sm btn-primary fc-audio" 
+                        style="display: none;" 
+                        data-path="{{ $audioPath['url'] }}">
+                        <i class="fa fa-play"></i>
+                    </button>
                 @else
                 <span>No audio file available</span>
                 @endif
@@ -124,9 +128,12 @@
                     <td>{{ $example->example }}</td>
                     <td >{{ $example->translation }}</td>
                     <td class="text-center">
-                        <button class="btn btn-sm">
-                            <i class="fa fa-volume-up"></i>
-                        </button>
+                        @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::EXAMPLE, $example->id))
+                        @if (file_exists($audioPath['fs']))
+                            <button class="btn btn-sm btn-primary fc-audio" data-path="{{ $audioPath['url'] }}">
+                                <i class="fa fa-play"></i>
+                            </button>
+                        @endif
                     </td>
                 </tr>
                 @endforeach

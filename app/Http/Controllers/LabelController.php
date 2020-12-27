@@ -28,17 +28,22 @@ class LabelController extends Controller
         // extract filter
         $labelIds = session()->get('filter_label_ids', []);
         $cardIds = session()->get('filter_card_ids', []);
+        $exampleIds = session()->get('filter_example_ids', []);
 
         // get labels
-        $labels = Label::with('cards');
-        if (count($labelIds) > 0)
-        {
+        $labels = Label::with(['cards', 'cards.examples']);
+
+        if (count($labelIds) > 0){
             $labels = $labels->wherein('id', $labelIds);
         }
-        if (count($cardIds) > 0)
-        {
+        if (count($cardIds) > 0){
             $labels = $labels->whereHas('cards', function($query) use ($cardIds) {
                 $query->wherein('card.id', $cardIds); 
+            });
+        }
+        if (count($exampleIds) > 0){
+            $labels = $labels->whereHas('cards.examples', function($query) use ($exampleIds) {
+                $query->wherein('example.id', $exampleIds); 
             });
         }
         $labels = $labels->orderBy('id', 'DESC')->get();

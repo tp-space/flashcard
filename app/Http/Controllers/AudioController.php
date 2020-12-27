@@ -17,11 +17,37 @@ class AudioController extends Controller
 
     const CARD = 1;
     const EXAMPLE =2;
+
+    const URL = 1;
+    const FS = 2;
     const TTS_FOLDER = "audio";
 
 
-    private static function getTargetFolder(){
-        return public_path() . DIRECTORY_SEPARATOR . self::TTS_FOLDER;
+    private static function getTargetFolder($pathType, $audioType, $id){
+
+        // set separator
+        $sep = ($pathType == self::FS ? DIRECTORY_SEPARATOR : "/");
+
+        // get default path
+        $folder = ($pathType == self::FS ? public_path() : '');
+
+        // add audio folder
+        $folder .= $sep . self::TTS_FOLDER;
+
+        // add audio type to path
+        $folder .= $sep . ($audioType == self::CARD ? 'c' : 'e');
+
+        // create subfolders based on ID
+        for ($i = 0; $i < strlen($id); $i++){
+            $folder .= $sep . substr($id, $i, 1);
+        }
+
+        // return target path
+        return [
+            "folder" => $folder,
+            "file" => $folder . $sep . $audioType . '_' . $id . '.mp3',
+        ];
+
     }
 
     private static function checkType($type){
@@ -41,6 +67,11 @@ class AudioController extends Controller
         if (!is_int($id) || $id < 1){
             throw new Exception('generateAudioFile: id is not an positive integer.');;
         }
+    }
+
+    public static function existsAudioFile($type, $id){
+        $filename = self::getTargetFolder(self::FS, $type, $id)["file"];
+        return file_exists($filename);
     }
 
     public static function generateAudioFile($type, $id, $symbol){
@@ -82,17 +113,15 @@ class AudioController extends Controller
 
         $client->close();
 
+        $target = self::getTargetFolder(self::FS, $type, $id);
+
         // create target folder if not exists
-        $folder = self::getTargetFolder();
-        if (!file_exists($folder)){
-            mkdir($folder, 0755, true);
+        if (!file_exists($target["folder"])){
+            mkdir($target["folder"], 0755, true);
         }
 
-        // generate file name
-        $fileName =  $folder . DIRECTORY_SEPARATOR . $type . '_' . $id . '.mp3';
-
         // store file (overwrites if file already exists)
-        file_put_contents($fileName, $audioContent);
+        file_put_contents($target["file"], $audioContent);
 
     }
 
@@ -101,7 +130,7 @@ class AudioController extends Controller
         self::checkType($type);
         self::checkId($id);
 
-        $fileName =  self::getTargetFolder() . DIRECTORY_SEPARATOR . $type . '_' . $id . '.mp3';
+        $fileName =  self::getTargetFolder(self::FS, $type, $id)["file"];
 
         if (file_exists($fileName)){
             $content = file_get_contents($fileName);
@@ -119,8 +148,8 @@ class AudioController extends Controller
 
         // Ok to use "/" as the separator in the URL is not OS specific
         return  [
-            'url' => "/" . self::TTS_FOLDER . "/" . $type . '_' . $id . '.mp3',
-            'full' => self::getTargetFolder() . "/" . $type . '_' . $id . '.mp3',
+            'url' => self::getTargetFolder(self::URL, $type, $id)["file"],
+            'fs' => self::getTargetFolder(self::FS, $type, $id)["file"],
         ];
 
     }
@@ -130,7 +159,7 @@ class AudioController extends Controller
         self::checkType($type);
         self::checkId($id);
 
-        $fileName =  self::getTargetFolder() . DIRECTORY_SEPARATOR . $type . '_' . $id . '.mp3';
+        $fileName =  self::getTargetFolder(self::FS, $type, $id)["file"];
 
         if (file_exists($fileName)){
             unlink($fileName);

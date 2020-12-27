@@ -40,7 +40,15 @@
             @foreach ($examples as $example)
             <tr id="tp_tr_{{ $example->id }}" data-id="{{ $example->id }}">
                 <td tp_item="tp_id">{{ $example->id }}</td>
-                <td tp_item="tp_example" data-toggle="tooltip" title="{{ $example->id }}">{{ $example->example }}</td>
+                <td tp_item="tp_example" data-toggle="tooltip" title="{{ $example->id }}">
+                    @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::EXAMPLE, $example->id))
+                    @if (file_exists($audioPath['fs']))
+                    <button class="btn btn-sm btn-primary fc-audio" data-path="{{ $audioPath['url'] }}">
+                        <i class="fa fa-play"></i>
+                    </button>
+                    @endif
+                    {{ $example->example }}
+                </td>
                 <td tp_item="tp_translation">{{ $example->translation }}</td>
                 <td tp_item="tp_cards" tp_value="{{ $example->cards->pluck('id') }}" class="text-center">
                     <a 
@@ -238,7 +246,7 @@
             case "edit":
 
                 // get example id
-                var el_tr = $(button).parent().parent();
+                var el_tr = $(button).closest('tr');
                 var id = el_tr.data('id');
 
                 // configure modal form
@@ -261,7 +269,7 @@
                 $('#_method_change').val('POST');
 
                 // code block
-                var el_tr = $(button).parent().parent();
+                var el_tr = $(button).closest('tr');
                 $('#tp_modal_example #tp_example').val(el_tr.find('[tp_item="tp_example"]').html());
                 $('#tp_modal_example #tp_pinyin').val(el_tr.find('[tp_item="tp_pinyin"]').html());
                 $('#tp_modal_example #tp_translation').val(el_tr.find('[tp_item="tp_translation"]').html());
@@ -281,7 +289,7 @@
 
             // get example id
             var button = $(event.relatedTarget);
-            var el_tr = $(button).parent().parent();
+            var el_tr = $(button).closest('tr');
             id = el_tr.data('id');
 
             // update modal form content

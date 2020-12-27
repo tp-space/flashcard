@@ -209,7 +209,7 @@
             case "edit":
 
                 // get label id
-                var el_tr = $(button).parent().parent();
+                var el_tr = $(button).closest('tr');
                 var id = el_tr.data('id');
 
                 // configure modal form
@@ -230,7 +230,7 @@
                 $('#_method_change').val('POST');
 
                 // code block
-                var el_tr = $(button).parent().parent();
+                var el_tr = $(button).closest('tr');
                 $('#tp_modal_label #tp_label').val(el_tr.find('[tp_item="tp_label"]').html());
                 $('#tp_modal_label #tp_cards').val(JSON.parse(el_tr.find('[tp_item="tp_cards"]').attr('tp_value'))).change();
 
@@ -248,7 +248,7 @@
 
             // get label id
             var button = $(event.relatedTarget);
-            var el_tr = $(button).parent().parent();
+            var el_tr = $(button).closest('tr');
             id = el_tr.data('id');
 
             // update modal form content

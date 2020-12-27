@@ -50,7 +50,7 @@
                 <td tp_item="tp_id">{{ $card->id }}</td>
                 <td tp_item="tp_symbol" data-toggle="tooltip" title="{{ $card->id }}">
                     @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
-                    @if (file_exists($audioPath['full']))
+                    @if (file_exists($audioPath['fs']))
                     <button class="btn btn-sm btn-primary fc-audio" data-path="{{ $audioPath['url'] }}">
                         <i class="fa fa-play"></i>
                     </button>
@@ -81,38 +81,34 @@
                     </a>
                 </td>
                 <td class="text-center">
-                    <div class="btn-group">
-                        <button class="btn btn-sm " 
-                            title="Edit card" 
-                            data-toggle="modal" 
-                            data-target="#tp_modal_card" 
-                            data-op="edit">
-                            <i class="fa fa-edit"></i>
-                        </button>
-                        <button 
-                            class="btn btn-sm " 
-                            title="Clone card" 
-                            data-toggle="modal" 
-                            data-target="#tp_modal_card" 
-                            data-op="clone">
-                            <i class="fa fa-clone"></i>
-                        </button>
-                        <button 
-                            class="btn btn-sm btn-danger" 
-                            title="Delete card" 
-                            data-toggle="modal" 
-                            data-target="#tp_modal_card_delete">
-                            <i class="fa fa-trash"></i>
-                        </button>
-                    </div>
+                    <button class="btn btn-sm " 
+                        title="Edit card" 
+                        data-toggle="modal" 
+                        data-target="#tp_modal_card" 
+                        data-op="edit">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button 
+                        class="btn btn-sm " 
+                        title="Clone card" 
+                        data-toggle="modal" 
+                        data-target="#tp_modal_card" 
+                        data-op="clone">
+                        <i class="fa fa-clone"></i>
+                    </button>
+                    <button 
+                        class="btn btn-sm btn-danger" 
+                        title="Delete card" 
+                        data-toggle="modal" 
+                        data-target="#tp_modal_card_delete">
+                        <i class="fa fa-trash"></i>
+                    </button>
                 </td>
             </tr>
             @endforeach
         </tbody>
     </table>
     
-    <audio id="fc-player" style="display: none;" src="" type="audio/mp3"></audio>
-
 </div>
 
 
@@ -361,15 +357,6 @@
             // update modal form content
             $('#tp_modal_card_delete_form').attr('action', '/cards/' + id);
             $('#tp_modal_card_delete_text').html('Do you really want to delete '  + id + '?');
-
-        });
-
-        $(document).on('click', '.fc-audio', function (event) {
-
-            var src = $(this).data('path');
-            var audio = document.getElementById('fc-player');
-            audio.setAttribute('src', src);
-            audio.play();
 
         });
 
