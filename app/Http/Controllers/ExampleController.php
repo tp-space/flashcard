@@ -82,6 +82,9 @@ class ExampleController extends Controller
         // update relationship
         $example->cards()->sync($request->get("tp_cards", "[]"));
 
+        // generate audio file
+        AudioController::generateAudioFile(AudioController::EXAMPLE, $example->id, $example->example);
+
         // clear session filters
         FilterController::sessionClearFilter();
 
@@ -127,6 +130,7 @@ class ExampleController extends Controller
 
         $example = Example::findOrFail($id);
         $example = $this->populateRecord($example, $request);
+        $isDirty = $example->isDirty('example');
         $example->save();
 
         // update relationship
@@ -135,6 +139,10 @@ class ExampleController extends Controller
         // clear session filters
         FilterController::sessionClearFilter();
 
+        // generate audio file
+        if ($isDirty){
+            AudioController::generateAudioFile(AudioController::EXAMPLE, $example->id, $example->example);
+        }
         return redirect('/examples/' . $id)
             ->with('success', 'Example "' . $example->example . '" has been changed');
 
@@ -153,6 +161,9 @@ class ExampleController extends Controller
 
         // update relationship
         $example->cards()->detach();
+
+        // Remove audio file
+        AudioController::deleteAudioFile(AudioController::EXAMPLE, $example->id);
 
         return redirect('/examples')->with('success', 'Example "' . $example->example . '" has been deleted');
 

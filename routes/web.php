@@ -6,6 +6,7 @@ use App\Http\Controllers\LabelController;
 use App\Http\Controllers\ExampleController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\QuizController;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +18,11 @@ use App\Http\Controllers\QuizController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Auth::routes();
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::middleware('auth')->group(function () {
 
 // Set Homepage
 Route::get('/', function () { return redirect('/cards'); });
@@ -37,3 +43,7 @@ Route::get('/quiz/reset', [QuizController::class, 'reset']);
 
 // set routes for quiz state
 Route::post('/quiz/update_state', [QuizController::class, 'updateState']);
+
+});
+
+

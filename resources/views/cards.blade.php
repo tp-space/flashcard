@@ -48,14 +48,14 @@
             @foreach ($cards as $card)
             <tr id="tp_tr_{{ $card->id }}" data-id="{{ $card->id }}">
                 <td tp_item="tp_id">{{ $card->id }}</td>
-                <td tp_item="tp_symbol" data-toggle="tooltip" title="{{ $card->id }}">
+                <td data-toggle="tooltip" title="{{ $card->id }}">
                     @php ($audioPath = App\Http\Controllers\AudioController::getAudioFilePath(App\Http\Controllers\AudioController::CARD, $card->id))
                     @if (file_exists($audioPath['fs']))
                     <button class="btn btn-sm btn-primary fc-audio" data-path="{{ $audioPath['url'] }}">
                         <i class="fa fa-play"></i>
                     </button>
                     @endif
-                    {{ $card->symbol }}
+                    <span tp_item="tp_symbol">{{ $card->symbol }}</span>
                 </td>
                 <td tp_item="tp_pinyin">{{ $card->pinyin }}</td>
                 <td tp_item="tp_translation">{{ $card->translation }}</td>

@@ -90,12 +90,12 @@ class CardController extends Controller
         $card = $this->populateRecord($card, $request);
         $card->save();
 
-        // generate audio file
-        AudioController::generateAudioFile(AudioController::CARD, $card->id, $card->symbol);
-
         // update relationship
         $card->labels()->sync($request->get("tp_labels", "[]"));
         $card->examples()->sync($request->get("tp_examples", "[]"));
+
+        // generate audio file
+        AudioController::generateAudioFile(AudioController::CARD, $card->id, $card->symbol);
 
         // clear session filters
         FilterController::sessionClearFilter();
@@ -144,14 +144,14 @@ class CardController extends Controller
         $isDirty = $card->isDirty('symbol');
         $card->save();
 
+        // update relationship
+        $card->labels()->sync($request->get("tp_labels", "[]"));
+        $card->examples()->sync($request->get("tp_examples", "[]"));
+
         // generate audio file
         if ($isDirty){
             AudioController::generateAudioFile(AudioController::CARD, $card->id, $card->symbol);
         }
-
-        // update relationship
-        $card->labels()->sync($request->get("tp_labels", "[]"));
-        $card->examples()->sync($request->get("tp_examples", "[]"));
 
         // clear session filters
         FilterController::sessionClearFilter();
@@ -172,12 +172,12 @@ class CardController extends Controller
         $card = Card::findOrFail($id);
         $card->delete();
 
-        // Remove audio file
-        AudioController::deleteAudioFile(AudioController::CARD, $card->id);
-
         // update relationship
         $card->labels()->detach();
         $card->examples()->detach();
+
+        // Remove audio file
+        AudioController::deleteAudioFile(AudioController::CARD, $card->id);
 
         return redirect('/cards')->with('success', 'Card "' . $card->symbol . '" has been deleted');
 
