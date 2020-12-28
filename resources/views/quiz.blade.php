@@ -40,7 +40,9 @@
     </div>
 
     <div class="row mt-3 mb-3">
-        <div class="col-md-6" style="height: 400px; background-color:beige;">
+        <div class="col-md-6" style="height: 400px">
+            <canvas id="myCanvas" style="width: 100%;height: 90%;border: 2px solid black; touch-action: none;"></canvas>
+            <button id="clear-canvas" class="btn btn-default" style="width: 100%;height: 10%;">Clear Drawing</button>
         </div>
         <div class="col-md-6" style="background-color:orange;">
             <div>
@@ -147,6 +149,13 @@
 
 @push ('scripts')
     <script>
+
+        var mousePressed = false;
+        var touchPressed = false;
+        var lastMouseX, lastMouseY;
+        var lastTouchX, lastTouchY;
+        var ctx;
+
         $(document).ready( function () {
 
             var table = $('#tp_quiz_table').DataTable({
@@ -158,7 +167,9 @@
                 }
             });
 
-            refresh_all();
+            initCanvas();
+
+            refresh_all(true);
 
         });
 
@@ -196,7 +207,13 @@
 
         });
 
-        function refresh_all(){
+        $(document).on('click', '#clear-canvas', function (event) {
+            // Use the identity matrix while clearing the canvas
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        });
+
+        function refresh_all(onLoad = false){
 
             elem = [
                 'fc-labels', 
@@ -244,9 +261,101 @@
                 } else {
                     span.hide();
                 }
-            }
 
+                // playback
+                if (onLoad && (state == 'on') && (elem[i] == 'fc-card-tts')){
+                    $(".fc-audio").trigger('click');
+                }
+            }
         }
 
+        function initCanvas() {
+
+            var canvas = document.querySelector('#myCanvas');
+            ctx = canvas.getContext("2d");
+
+            // prevent canvas stretching by setting the canvas size to the element's size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            // add touch event handler (for tablets)
+            canvas.addEventListener("touchstart", function (e) {
+                touchPressed = true;
+                var touch = e.touches[0];
+                x = touch.pageX - $(this).offset().left;
+                y = touch.pageY - $(this).offset().top;
+                drawTouchCanvas(x, y, false);
+            });
+
+            canvas.addEventListener("touchmove", function (e) {
+                if (touchPressed) {
+                    var touch = e.touches[0];
+                    x = touch.pageX - $(this).offset().left;
+                    y = touch.pageY - $(this).offset().top;
+                    drawTouchCanvas(x, y, true);
+                }
+            });
+
+            canvas.addEventListener("touchend", function (e) {
+                touchPressed = false;
+            });
+
+            canvas.addEventListener("touchcancel", function (e) {
+                touchPressed = false;
+            });
+
+
+            // add mouse event handler
+            $('#myCanvas').mousedown(function (e) {
+                mousePressed = true;
+                x = e.pageX - $(this).offset().left;
+                y = e.pageY - $(this).offset().top;
+                drawMouseCanvas(x, y, false);
+            });
+
+            $('#myCanvas').mousemove(function (e) {
+                if (mousePressed) {
+                    x = e.pageX - $(this).offset().left;
+                    y = e.pageY - $(this).offset().top;
+                    drawMouseCanvas(x, y, true);
+                }
+            });
+
+            $('#myCanvas').mouseup(function (e) {
+                mousePressed = false;
+            });
+
+            $('#myCanvas').mouseleave(function (e) {
+                mousePressed = false;
+            });
+        }
+
+        function drawTouchCanvas(x, y, isDown) {
+            if (isDown) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.lineJoin = "round";
+                ctx.moveTo(lastTouchX, lastTouchY);
+                ctx.lineTo(x, y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            lastTouchX = x; lastTouchY = y;
+        }
+
+        function drawMouseCanvas(x, y, isDown) {
+            if (isDown) {
+                ctx.beginPath();
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 1;
+                ctx.lineJoin = "round";
+                ctx.moveTo(lastMouseX, lastMouseY);
+                ctx.lineTo(x, y);
+                ctx.closePath();
+                ctx.stroke();
+            }
+            lastMouseX = x; lastMouseY = y;
+        }
     </script>
 @endpush
