@@ -28,6 +28,7 @@
 
 		@include('navbar')
 
+        @if (isset($filterLabels) && isset($filterCards) && isset($filterExamples))
         <div class="container shadow mb-5 mt-5 pt-2 pb-2 bg-light rounded">
             <div class="mb-15">
                 <div class="container">
@@ -130,6 +131,7 @@
 
             </div>
         </div>
+        @endif
 
 		@yield('content')
 		@include('footer')

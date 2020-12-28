@@ -38,7 +38,8 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        // Disabled in order to also allow user creation while logged in
+        //$this->middleware('guest');
     }
 
     /**
