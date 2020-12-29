@@ -22,7 +22,7 @@ class FilterController extends Controller
 
         // set the selected filter
         $var = 'filter_' . $source .  '_ids';
-        session([$var => [$id]]);
+        session([$var => ($source == 'user' ? $id : [$id])]);
 
     }
 
