@@ -25,7 +25,7 @@ Auth::routes();
 Route::middleware('auth')->group(function () {
 
 // Set Homepage
-Route::get('/', function () { return redirect('/cards'); });
+Route::get('/', function () { return redirect('/labels'); });
 
 // Set routes for Cards, Labels and Examples
 Route::resource('cards', CardController::class);

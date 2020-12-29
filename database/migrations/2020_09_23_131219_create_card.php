@@ -18,7 +18,6 @@ class CreateCard extends Migration
             $table->text("symbol");
             $table->text("pinyin");
             $table->text("translation");
-            $table->text("example");
             $table->text("comment");
             $table->boolean("done");
             $table->timestamps();

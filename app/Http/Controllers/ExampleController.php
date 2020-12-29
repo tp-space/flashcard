@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Card;
 use App\Models\Label;
 use App\Models\Example;
+use App\Models\User;
 
 class ExampleController extends Controller
 {
@@ -15,6 +17,7 @@ class ExampleController extends Controller
         // populate record with data in request
         $data->example = $request->get("tp_example","<unknown>");
         $data->translation = $request->get("tp_translation","<unknown>");
+        $data->user_id = $request->session()->get('filter_user_ids');
 
         return $data;
     }
@@ -30,9 +33,16 @@ class ExampleController extends Controller
         $exampleIds = session()->get('filter_example_ids', []);
         $cardIds = session()->get('filter_card_ids', []);
         $labelIds = session()->get('filter_label_ids', []);
+        $userIds = session()->get('filter_user_ids', 0);
+
+        // Make sure user filter is set
+        if ($userIds == 0){
+            $userIds = Auth::id();
+            FilterController::sessionSetFilter('user', $userIds);
+        }
 
         // get examples
-        $examples = Example::with(['cards', 'cards.labels']);
+        $examples = Example::with(['cards', 'cards.labels'])->where('user_id', $userIds);
         if (count($exampleIds) > 0){
             $examples = $examples->wherein('id', $exampleIds); 
         }
@@ -49,11 +59,27 @@ class ExampleController extends Controller
         $examples = $examples->orderBy('id', 'DESC')->get();
 
         // get data for filters
-        $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
-        $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
-        $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
+        $filterCards = Card::select('id', 'symbol')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterLabels = Label::select('id', 'label')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterExamples = Example::select('id', 'example')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterUsers = User::select('id', 'name')->orderBy('id', 'DESC')->get();
 
-        return view('examples', compact('examples', 'filterCards', 'filterLabels', 'filterExamples'));
+        return view('examples', compact(
+            'examples',
+            'filterCards',
+            'filterLabels',
+            'filterExamples',
+            'filterUsers'
+        ));
     }
 
     /**

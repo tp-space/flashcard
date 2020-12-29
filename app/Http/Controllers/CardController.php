@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Card;
 use App\Models\Label;
 use App\Models\Example;
+use App\Models\User;
 
 class CardController extends Controller
 {
@@ -17,7 +19,7 @@ class CardController extends Controller
         $data->pinyin = $request->get("tp_pinyin","<unknown>");
         $data->translation = $request->get("tp_translation","<unknown>");
         $data->comment = $request->get("tp_comment","<unknown>");
-        $data->example = "";
+        $data->user_id = $request->session()->get('filter_user_ids');
         $data->done = False;
 
         if (is_null($data->comment)){
@@ -38,9 +40,16 @@ class CardController extends Controller
         $cardIds = session()->get('filter_card_ids', []);
         $labelIds = session()->get('filter_label_ids', []);
         $exampleIds = session()->get('filter_example_ids', []);
+        $userIds = session()->get('filter_user_ids', 0);
+
+        // Make sure user filter is set
+        if ($userIds == 0){
+            $userIds = Auth::id();
+            FilterController::sessionSetFilter('user', $userIds);
+        }
 
         // get cards
-        $cards = Card::with('labels')->with('examples');
+        $cards = Card::with('labels')->with('examples')->where('user_id', $userIds);
         if (count($cardIds) > 0){
             $cards = $cards->wherein('id', $cardIds); 
         }
@@ -59,11 +68,27 @@ class CardController extends Controller
         $cards = $cards->orderBy('id', 'DESC')->get();
 
         // get data for filters
-        $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
-        $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
-        $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
+        $filterCards = Card::select('id', 'symbol')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterLabels = Label::select('id', 'label')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterExamples = Example::select('id', 'example')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterUsers = User::select('id', 'name')->orderBy('id', 'DESC')->get();
 
-        return view('cards', compact('cards', 'filterCards', 'filterLabels', 'filterExamples'));
+        return view('cards', compact(
+            'cards',
+            'filterCards',
+            'filterLabels',
+            'filterExamples',
+            'filterUsers'
+        ));
 
     }
 

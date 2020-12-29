@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Card;
 use App\Models\Label;
 use App\Models\Example;
+use App\Models\User;
 
 class QuizController extends Controller
 {
@@ -16,9 +18,16 @@ class QuizController extends Controller
         $cardIds = session()->get('filter_card_ids', []);
         $labelIds = session()->get('filter_label_ids', []);
         $exampleIds = session()->get('filter_example_ids', []);
+        $userIds = session()->get('filter_user_ids', 0);
+
+        // Make sure user filter is set
+        if ($userIds == 0){
+            $userIds = Auth::id();
+            FilterController::sessionSetFilter('user', $userIds);
+        }
 
         // get cards
-        $cards = Card::with('labels')->with('examples');
+        $cards = Card::with('labels')->with('examples')->where('user_id', $userIds);
         if (count($cardIds) > 0){
             $cards = $cards->wherein('id', $cardIds); 
         }
@@ -46,11 +55,20 @@ class QuizController extends Controller
             $card = $remain[$select];
         }
 
-
         // get data for filters
-        $filterCards = Card::select('id', 'symbol')->orderBy('id', 'DESC')->get();
-        $filterLabels = Label::select('id', 'label')->orderBy('id', 'DESC')->get();
-        $filterExamples = Example::select('id', 'example')->orderBy('id', 'DESC')->get();
+        $filterCards = Card::select('id', 'symbol')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterLabels = Label::select('id', 'label')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterExamples = Example::select('id', 'example')
+            ->where('user_id', $userIds)
+            ->orderBy('id', 'DESC')
+            ->get();
+        $filterUsers = User::select('id', 'name')->orderBy('id', 'DESC')->get();
 
         return view('quiz', compact(
             'card',
@@ -59,6 +77,7 @@ class QuizController extends Controller
             'filterExamples',
             'countAll',
             'countRemain',
+            'filterUsers',
         ));
 
     }
@@ -75,7 +94,17 @@ class QuizController extends Controller
     public function reset()
     {
 
-        Card::where('done', '!=', false)->update(['done' => false]);
+        $userIds = session()->get('filter_user_ids');
+
+        // Make sure user filter is set
+        if ($userIds == 0){
+            $userIds = Auth::id();
+            FilterController::sessionSetFilter('user', $userIds);
+        }
+
+        Card::where('done', '!=', false)
+            ->where('user_id', $userIds)
+            ->update(['done' => false]);
 
         return redirect('/quiz');
     }

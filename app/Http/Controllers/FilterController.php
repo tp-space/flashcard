@@ -15,8 +15,7 @@ class FilterController extends Controller
         ]);
     }
 
-    public function setSingleFilter($source, $id, $target)
-    {
+    public static function sessionSetFilter($source, $id){
 
         // clear all filters
         self::sessionClearFilter();
@@ -25,20 +24,25 @@ class FilterController extends Controller
         $var = 'filter_' . $source .  '_ids';
         session([$var => [$id]]);
 
+    }
+
+    public function setSingleFilter($source, $id, $target)
+    {
+        self::sessionSetFilter($source, $id);
         return redirect($target);
     }
 
     public function clearAllFilters(Request $request){
-
-
-        // clear all filters
         self::sessionClearFilter();
-
         return redirect($request->get('tp_url'));
     }
 
     public function setAllFilters(Request $request){
 
+        // get currently selected user 
+        $oldUserIds = $request->session()->get('filter_user_ids');
+
+        $userIds = $request->get('tp_filter_user', 0);
         $cardIds = $request->get('tp_filter_card', []);
         $labelIds = $request->get('tp_filter_label', []);
         $exampleIds = $request->get('tp_filter_example', []);
@@ -47,9 +51,16 @@ class FilterController extends Controller
             'filter_card_ids' => $cardIds,
             'filter_label_ids' => $labelIds,
             'filter_example_ids' => $exampleIds,
+            'filter_user_ids' => $userIds,
         ]);
 
+        // clear filter if clear-button has been pressed or if selected user filter has been changed
+        if (($request->has('tp_filter_clear')) || ($oldUserIds != $userIds)){
+            self::sessionClearFilter();
+        }
+
         return redirect($request->get('tp_url'));
+
     }
 
 }
