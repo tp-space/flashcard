@@ -144,13 +144,20 @@ class generateAudio extends Command
 
                 try {
 
+                    $bar = $this->output->createProgressBar(count($cards) + count($examples));
+                    $bar->start();
                     foreach($cards as $id => $symbol){
                         AudioController::generateAudioFile(AudioController::CARD, $id, $symbol);
+                        $bar->advance();
+                        usleep(500000);
                     }
 
                     foreach($examples as $id => $example){
                         AudioController::generateAudioFile(AudioController::EXAMPLE, $id, $example);
+                        $bar->advance();
+                        usleep(500000);
                     }
+                    $bar->finish();
 
                 } catch(Exception $e){
                     $this->error($e->getMessage());
