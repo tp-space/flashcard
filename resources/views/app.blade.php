@@ -14,6 +14,9 @@
         <!-- Latest compiled and minified CSS -->
         <link rel="stylesheet" href="/comp/bootstrap-select/css/bootstrap-select.min.css">
 
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="/comp/select2/css/select2.min.css">
+
         <!-- Add datatables -->
         <link rel="stylesheet" type="text/css" href="/comp/datatables.net/css/jquery.dataTables.css">
 
@@ -56,17 +59,17 @@
                             <select 
                                id="tp_filter_label" 
                                name="tp_filter_label[]" 
-                               class="selectpicker filter" 
-                               title="No labels selected" 
+                               class="tp_auto" 
                                onchange="this.form.submit()" 
-                               multiple data-live-search="true">
-
+                               multiple>
+{{--
                                 @foreach ($filterLabels as $filterLabel)
                                 @php ($sel = (in_array($filterLabel->id, $sel_labels) ? 'selected' : ''))
                                 <option {{ $sel }} value="{{ $filterLabel->id }}">
                                     {{ $filterLabel->label }}
                                 </option>
                                 @endforeach
+--}}
                             </select>
 
                             <select 
@@ -159,6 +162,9 @@
         <!-- Latest compiled and minified JavaScript -->
         <script src="/comp/bootstrap-select/js/bootstrap-select.min.js"></script>
 
+        <!-- Latest compiled and minified JavaScript bootstrap-select -->
+        <script src="/comp/select2/js/select2.min.js"></script>
+
         <!-- Datatables -->
         <script type="text/javascript" charset="utf8" src="/comp/datatables.net/js/jquery.dataTables.js"></script>
         <script type="text/javascript" charset="utf8" src="/comp/datatables.net-plugins/api/row().show().js"></script>
@@ -166,6 +172,30 @@
         <script>
             $(document).ready( function () {
                 $('.filter').selectpicker();
+                $('.tp_auto').select2({
+                    placeholder: "No labels selected",
+                    //theme: "bootstrap",
+                    dataType: 'json',
+                    width: '20%',
+                    minimumInputLength: 0,
+                    ajax: {
+                        url:'/filter/autocomplete',
+                        delay: 1000,
+                        data: function(params) {
+                            return {
+                                'search': params.term,
+                            }
+                            return query;
+                        },
+                        processResults: function(data){
+                            console.log(data);
+                            return { 
+                                results: data
+                            };
+                        }
+                    },
+                    cache: true,
+                });
             });
 
         $(document).on('click', '.fc-audio', function (event) {

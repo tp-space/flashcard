@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Label;
+use Response;
 
 class FilterController extends Controller
 {
@@ -63,4 +65,17 @@ class FilterController extends Controller
 
     }
 
+    public function autocomplete(Request $request){
+        $search = $request->get('search');
+        $results = Label::select(['id', 'label'])->where('label', 'LIKE', '%' . $search . '%')->get();
+        $data = [];
+        foreach($results as $result){
+            $data[] = [
+                'id' => $result->id,
+                'text' => $result->label,
+            ];
+
+        }
+        return Response::json($data);
+    }
 }

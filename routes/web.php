@@ -43,6 +43,7 @@ Route::get('/quiz/reset', [QuizController::class, 'reset']);
 
 // set routes for quiz state
 Route::post('/quiz/update_state', [QuizController::class, 'updateState']);
+Route::get('/filter/autocomplete', [FilterController::class, 'autocomplete']);
 
 });
 

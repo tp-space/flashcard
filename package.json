@@ -30,7 +30,8 @@
     "datatables.net-dt": "^1.10.22",
     "datatables.net-plugins": "^1.10.20",
     "jquery": "^3.5.1",
-    "popper.js": "^1.16.1"
+    "popper.js": "^1.16.1",
+    "select2": "^4.0.13"
   },
   "keywords": [],
   "author": "",
