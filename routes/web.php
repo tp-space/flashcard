@@ -6,6 +6,7 @@ use App\Http\Controllers\LabelController;
 use App\Http\Controllers\ExampleController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -25,26 +26,39 @@ Auth::routes();
 Route::middleware('auth')->group(function () {
 
 // Set Homepage
-Route::get('/', function () { return redirect('/labels'); });
+Route::get('/', function () { return redirect('/main'); });
 
 // Set routes for Cards, Labels and Examples
 Route::resource('cards', CardController::class);
 Route::resource('labels', LabelController::class);
 Route::resource('examples', ExampleController::class);
 
+
+Route::get('/main', [MainController::class, 'index']);
+
 // Set routes for filtering
-Route::get('/filter/{source}/{id}/{target}', [FilterController::class, 'setSingleFilter']);
-Route::post('/filter', [FilterController::class, 'setAllFilters']);
+//Route::get('/filter/{source}/{id}/{target}', [FilterController::class, 'setSingleFilter']);
+//Route::post('/filter', [FilterController::class, 'setAllFilters']);
 
 // set routes for quiz
-Route::get('/quiz', [QuizController::class, 'index']);
+//Route::get('/quiz', [QuizController::class, 'index']);
 Route::get('/quiz/done/{id}', [QuizController::class, 'setDone']);
 Route::get('/quiz/reset', [QuizController::class, 'reset']);
 
 // set routes for quiz state
 Route::post('/quiz/update_state', [QuizController::class, 'updateState']);
-Route::get('/filter/autocomplete', [FilterController::class, 'autocomplete']);
+
+// set routes for session control
+Route::get('/session', [FilterController::class, 'getSession']);
+Route::post('/session', [FilterController::class, 'setSession']);
+
+// set routes for autocomplete
+Route::get('/autocomplete', [MainController::class, 'autocomplete']);
+
+// set routes for pagination
+Route::post('/pagination', [MainController::class, 'pagination']);
 
 });
+
 
 

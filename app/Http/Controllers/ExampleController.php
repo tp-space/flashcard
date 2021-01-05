@@ -56,28 +56,14 @@ class ExampleController extends Controller
                 $query->wherein('label.id', $labelIds); 
             });
         }
-        $examples = $examples->orderBy('id', 'DESC')->get();
 
-        // get data for filters
-        $filterCards = Card::select('id', 'symbol')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
-        $filterLabels = Label::select('id', 'label')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
-        $filterExamples = Example::select('id', 'example')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
+        $examples = $examples->orderBy('id', 'DESC')->get();
         $filterUsers = User::select('id', 'name')->orderBy('id', 'DESC')->get();
+        $withFilters = true;
 
         return view('examples', compact(
             'examples',
-            'filterCards',
-            'filterLabels',
-            'filterExamples',
+            'withFilters',
             'filterUsers'
         ));
     }

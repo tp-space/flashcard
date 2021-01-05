@@ -56,29 +56,10 @@ class LabelController extends Controller
             });
         }
         $labels = $labels->orderBy('id', 'DESC')->get();
-
-        // get data for filters
-        $filterCards = Card::select('id', 'symbol')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
-        $filterLabels = Label::select('id', 'label')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
-        $filterExamples = Example::select('id', 'example')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
         $filterUsers = User::select('id', 'name')->orderBy('id', 'DESC')->get();
+        $withFilters = true;
 
-        return view('labels', compact(
-            'labels',
-            'filterCards',
-            'filterLabels',
-            'filterExamples',
-            'filterUsers'
-        ));
+        return view('labels', compact('labels', 'withFilters', 'filterUsers'));
     }
 
     /**

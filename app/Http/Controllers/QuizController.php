@@ -55,30 +55,10 @@ class QuizController extends Controller
             $card = $remain[$select];
         }
 
-        // get data for filters
-        $filterCards = Card::select('id', 'symbol')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
-        $filterLabels = Label::select('id', 'label')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
-        $filterExamples = Example::select('id', 'example')
-            ->where('user_id', $userIds)
-            ->orderBy('id', 'DESC')
-            ->get();
         $filterUsers = User::select('id', 'name')->orderBy('id', 'DESC')->get();
+        $withFilters = true;
 
-        return view('quiz', compact(
-            'card',
-            'filterCards',
-            'filterLabels',
-            'filterExamples',
-            'countAll',
-            'countRemain',
-            'filterUsers',
-        ));
+        return view('quiz', compact('card', 'withFilters', 'countAll', 'countRemain', 'filterUsers'));
 
     }
 

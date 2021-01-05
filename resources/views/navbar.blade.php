@@ -13,20 +13,42 @@
         </button>
         <div class="collapse navbar-collapse" id="tp_nav">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item {{ Request::is('labels') ? 'active' : '' }}">
-                    <a class="nav-link" href="/labels">Labels <span class="sr-only">(current)</span></a>
+
+                @php ($sel = \App\Http\Controllers\FilterController::getState()["tp_app"])
+
+                @php ($app = \App\Http\Controllers\MainController::MAIN_LABEL)
+                <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
+                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                        Labels<span class="sr-only">(current)</span>
+                    </a>
                 </li>
-                <li class="nav-item {{ Request::is('cards') ? 'active' : '' }}">
-                    <a class="nav-link" href="/cards">Cards <span class="sr-only">(current)</span></a>
+
+                @php ($app = \App\Http\Controllers\MainController::MAIN_CARD)
+                <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
+                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                        Cards<span class="sr-only">(current)</span>
+                    </a>
                 </li>
-                <li class="nav-item {{ Request::is('examples') ? 'active' : '' }}">
-                    <a class="nav-link" href="/examples">Examples <span class="sr-only">(current)</span></a>
+
+                @php ($app = \App\Http\Controllers\MainController::MAIN_EXAMPLE)
+                <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
+                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                        Examples<span class="sr-only">(current)</span>
+                    </a>
                 </li>
-                <li class="nav-item {{ Request::is('quiz') ? 'active' : '' }}">
-                    <a class="nav-link" href="/quiz">Quiz <span class="sr-only">(current)</span></a>
+
+                @php ($app = \App\Http\Controllers\MainController::MAIN_QUIZ)
+                <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
+                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                        Quiz<span class="sr-only">(current)</span>
+                    </a>
                 </li>
-                <li class="nav-item {{ Request::is('configs') ? 'active' : '' }}">
-                    <a class="nav-link" href="/configs">Config <span class="sr-only">(current)</span></a>
+
+                @php ($app = \App\Http\Controllers\MainController::MAIN_STATS)
+                <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
+                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                        Stats<span class="sr-only">(current)</span>
+                    </a>
                 </li>
             </ul>
 
@@ -48,7 +70,15 @@
                     @endif
                 @else
                     <li class="nav-item dropdown">
-                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                        <a 
+                            id="navbarDropdown" 
+                            class="nav-link dropdown-toggle" 
+                            href="#" 
+                            role="button" 
+                            data-toggle="dropdown" 
+                            aria-haspopup="true" 
+                            aria-expanded="false" 
+                            v-pre>
                             {{ Auth::user()->name }}
                         </a>
 
