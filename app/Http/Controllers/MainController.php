@@ -43,7 +43,7 @@ class MainController extends Controller
         return view('main');
     }
 
-    private function getLabels($state){
+    private static function getLabels($state){
 
         // get labels
         $labels = Label::withCount('cards')->with('cards.examples')->where('user_id', $state['tp_user_id']);
@@ -63,7 +63,7 @@ class MainController extends Controller
         return $labels;
     }
 
-    private function getCards($state){
+    public static function getCards($state){
 
         // get cards
         $cards = Card::withCount(['labels', 'examples'])->where('user_id', $state['tp_user_id']);
@@ -83,7 +83,7 @@ class MainController extends Controller
         return $cards;
     }
 
-    private function getExamples($state){
+    private static function getExamples($state){
 
         // get examples
         $examples = Example::withCount('cards')->with('cards.labels')->where('user_id', $state["tp_user_id"]);
@@ -104,7 +104,7 @@ class MainController extends Controller
         return $examples;
     }
 
-    private function getQuiz($state){
+    private static function getQuiz($state){
 
         // get examples
         $examples = Example::withCount('cards')->with('cards.labels')->where('user_id', $state["tp_user_id"]);
@@ -145,16 +145,16 @@ class MainController extends Controller
         $req = null;
         switch($state["tp_app"]){
         case MainController::MAIN_LABEL:
-            $req = $this->getLabels($state);
+            $req = self::getLabels($state);
             break;
         case MainController::MAIN_CARD:
-            $req = $this->getCards($state);
+            $req = self::getCards($state);
             break;
         case MainController::MAIN_EXAMPLE:
-            $req = $this->getExamples($state);
+            $req = self::getExamples($state);
             break;
         case MainController::MAIN_QUIZ:
-            $req = $this->getQuiz($state);
+            $req = self::getQuiz($state);
             break;
         default:
             return Response::json([]);
