@@ -32,16 +32,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/quiz/done/{id}', [QuizController::class, 'setDone']);
     Route::get('/quiz/reset', [QuizController::class, 'reset']);
 
-    // set routes for session control
-    Route::get('/session', [FilterController::class, 'getSession']);
-    Route::post('/session', [FilterController::class, 'setSession']);
+
+    // FIXME: To move below routes to routes/api.php 
+    // you need to enable Passport to support authentication
+
+
+    // set routes for datatable
+    Route::post('/datatable', [MainController::class, 'datatable']);
 
     // set routes for autocomplete
     Route::get('/autocomplete', [MainController::class, 'autocomplete']);
-
-    // set routes for pagination
-    Route::post('/pagination', [MainController::class, 'pagination']);
-
 });
 
 

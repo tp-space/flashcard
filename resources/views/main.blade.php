@@ -5,6 +5,12 @@
 
 @section ('content')
 
+    <div 
+        id="tp-const"
+        data-user-data="{{ json_encode( isset($userData) ? $userData : [] ) }}"
+        >
+    </div>
+
     <div class="container shadow mb-5 mt-5 pt-2 pb-2 bg-light rounded">
         <div class="mb-15">
             <div class="container">
@@ -51,8 +57,8 @@
                     <div style="margin-left:auto"></div>
 
                     <select 
-                        id="tp_user" 
-                        name="tp_user" 
+                        id="tp_filter_user" 
+                        name="tp_filter_user" 
                         class="tp_user text-right" 
                         style="margin-left:auto"
                         data-width="fit"

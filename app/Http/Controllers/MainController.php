@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Label;
 use App\Models\Card;
@@ -40,64 +41,80 @@ class MainController extends Controller
      */
     public function index()
     {
-        return view('main');
+        $userData = [[
+            'id' => Auth::id(),
+            'text' => Auth::user()->name,
+        ]];
+        return view('main', compact('userData'));
     }
 
-    private static function getLabels($state){
+    private static function getLabels($filters){
 
         // get labels
-        $labels = Label::withCount('cards')->with('cards.examples')->where('user_id', $state['tp_user_id']);
-        if (count($state["tp_label_ids"]) > 0){
-            $labels = $labels->wherein('id', $state["tp_label_ids"]);
+        $labels = Label::withCount('cards')->with('cards.examples')->where('user_id', $filters['userId']);
+        if (count($filters["labelIds"]) > 0){
+            $labels = $labels->wherein('id', $filters["labelIds"]);
         }
-        if (count($state["tp_card_ids"]) > 0){
-            $labels = $labels->whereHas('cards', function($query) use ($state) {
-                $query->wherein('card.id', $state["tp_card_ids"]); 
+        if (count($filters["cardIds"]) > 0){
+            $labels = $labels->whereHas('cards', function($query) use ($filters) {
+                $query
+                    ->where('card.user_id', $filters["userId"])
+                    ->wherein('card.id', $filters["cardIds"]); 
             });
         }
-        if (count($state["tp_example_ids"]) > 0){
-            $labels = $labels->whereHas('cards.examples', function($query) use ($state) {
-                $query->wherein('example.id', $state["tp_example_ids"]); 
+        if (count($filters["exampleIds"]) > 0){
+            $labels = $labels->whereHas('cards.examples', function($query) use ($filters) {
+                $query
+                    ->where('example.user_id', $filters["userId"])
+                    ->wherein('example.id', $filters["exampleIds"]); 
             });
         }
         return $labels;
     }
 
-    public static function getCards($state){
+    public static function getCards($filters){
 
         // get cards
-        $cards = Card::withCount(['labels', 'examples'])->where('user_id', $state['tp_user_id']);
-        if (count($state['tp_card_ids']) > 0){
-            $cards = $cards->wherein('id', $state['tp_card_ids']); 
+        $cards = Card::withCount(['labels', 'examples'])->where('user_id', $filters['userId']);
+        if (count($filters['cardIds']) > 0){
+            $cards = $cards->wherein('id', $filters['cardIds']); 
         }
-        if (count($state['tp_label_ids']) > 0){
-            $cards = $cards->whereHas('labels', function($query) use ($state) {
-                $query->wherein('label.id', $state['tp_label_ids']); 
+        if (count($filters['labelIds']) > 0){
+            $cards = $cards->whereHas('labels', function($query) use ($filters) {
+                $query
+                    ->where('label.user_id', $filters["userId"])
+                    ->wherein('label.id', $filters['labelIds']); 
             });
         }
-        if (count($state['tp_example_ids']) > 0){
-            $cards = $cards->whereHas('examples', function($query) use ($state) {
-                $query->wherein('example.id', $state['tp_example_ids']); 
+        if (count($filters['exampleIds']) > 0){
+            $cards = $cards->whereHas('examples', function($query) use ($filters) {
+                $query
+                    ->where('example.user_id', $filters["userId"])
+                    ->wherein('example.id', $filters['exampleIds']); 
             });
         }
         return $cards;
     }
 
-    private static function getExamples($state){
+    private static function getExamples($filters){
 
         // get examples
-        $examples = Example::withCount('cards')->with('cards.labels')->where('user_id', $state["tp_user_id"]);
-        if (count($state["tp_example_ids"]) > 0){
-            $examples = $examples->wherein('id', $state["tp_example_ids"]); 
+        $examples = Example::withCount('cards')->with('cards.labels')->where('user_id', $filters["userId"]);
+        if (count($filters["exampleIds"]) > 0){
+            $examples = $examples->wherein('id', $filters["exampleIds"]); 
         }
-        if (count($state["tp_card_ids"]) > 0){
-            $examples = $examples->whereHas('cards', function($query) use ($state) {
-                $query->wherein('card.id', $state["tp_card_ids"]); 
+        if (count($filters["cardIds"]) > 0){
+            $examples = $examples->whereHas('cards', function($query) use ($filters) {
+                $query
+                    ->where('card.user_id', $filters["userId"])
+                    ->wherein('card.id', $filters["cardIds"]); 
             });
         }
-        if (count($state["tp_label_ids"]) > 0){
-            $examples = $examples->whereHas('cards.labels', function($query) use ($state) {
-                $query->wherein('label.id', $state["tp_label_ids"]); 
+        if (count($filters["labelIds"]) > 0){
+            $examples = $examples->whereHas('cards.labels', function($query) use ($filters) {
+                $query
+                    ->where('label.user_id', $filters["userId"])
+                    ->wherein('label.id', $filters["labelIds"]); 
             });
         }
 
@@ -127,7 +144,7 @@ class MainController extends Controller
         return $examples;
     }
 
-    public function pagination(Request $request)
+    public function datatable(Request $request)
     {
 
         $columns = $request->get('columns');
@@ -139,22 +156,28 @@ class MainController extends Controller
         $orderCol = $columns[$order[0]["column"]]["data"];
         $orderDir = $order[0]["dir"];
 
-        // extract state
-        $state = FilterController::getState();
+        $app = $request->get("tpApp");
+        $filters = [
+            'userId' => array_column(json_decode($request->get("tpUserData")), 'id')[0],
+            'labelIds' => array_column(json_decode($request->get("tpLabelData")), 'id'),
+            'cardIds' => array_column(json_decode($request->get("tpCardData")), 'id'),
+            'exampleIds' => array_column(json_decode($request->get("tpExampleData")), 'id'),
+        ];
+
 
         $req = null;
-        switch($state["tp_app"]){
+        switch($app){
         case MainController::MAIN_LABEL:
-            $req = self::getLabels($state);
+            $req = self::getLabels($filters);
             break;
         case MainController::MAIN_CARD:
-            $req = self::getCards($state);
+            $req = self::getCards($filters);
             break;
         case MainController::MAIN_EXAMPLE:
-            $req = self::getExamples($state);
+            $req = self::getExamples($filters);
             break;
         case MainController::MAIN_QUIZ:
-            $req = self::getQuiz($state);
+            $req = self::getQuiz($filters);
             break;
         default:
             return Response::json([]);
@@ -265,20 +288,36 @@ class MainController extends Controller
     }
 
     public function autocomplete(Request $request){
-        $search = $request->get('searchData', '');
-        $type = $request->get('searchType', '');
+
+
+        $type = $request->get('selectType');
+        if (!is_string($type)){
+            return Response::json([]);
+        }
+
+        $userId = json_decode($request->get('userData'));
+        if (isset($userId[0]->id)){
+            $userId = $userId[0]->id;
+        } else {
+            return Response::json([]);
+        }
+
+        $search = $request->get('searchData');
+        if (!is_string($search)){
+            $search = "";
+        }
 
         switch($type){
         case "label":
-            $query = Label::select(['id', 'label']);
+            $query = Label::select(['id', 'label'])->where('user_id', $userId);
             $field = "label";
             break;
         case "card":
-            $query = Card::select(['id', 'symbol']);
+            $query = Card::select(['id', 'symbol'])->where('user_id', $userId);
             $field = "symbol";
             break;
         case "example":
-            $query = Example::select(['id', 'example']);
+            $query = Example::select(['id', 'example'])->where('user_id', $userId);
             $field = "example";
             break;
         case "user":
