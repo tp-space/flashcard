@@ -9,6 +9,11 @@ var tp = {
         lastTouchX: null, 
         lastTouchY: null,
         ctx: null,
+    },
+    quiz: {
+        doneId: null,
+        reset: false,
+        play: false,
     }
 }
 
@@ -31,17 +36,35 @@ $(document).ready( function () {
 
     refreshAll(['app', 'user', 'label', 'card', 'example']);
 
-    init_quiz();
-
-
     $(document).on('click', '.tp-audio', function (event) {
 
         var src = $(this).data('path');
+        console.log('src', src);
         var audio = new Audio(src);
         audio.load();
         audio.play();
         return;
 
+    });
+
+    $(document).on('click', '#tp-reset', function (event) {
+        refreshAll(['data', 'reset']);
+    });
+
+    $(document).on('click', '#tp-keep', function (event) {
+        tp.state.quiz.state = "Show";
+        if (tp.state.quiz.visibleFields.indexOf('tp-toggle-audio') > -1){
+            tp.quiz.play = true;
+        }
+        refreshAll(['data']);
+    });
+
+    $(document).on('click', '#tp-next', function (event) {
+        tp.state.quiz.state = "Show";
+        if (tp.state.quiz.visibleFields.indexOf('tp-toggle-audio') > -1){
+            tp.quiz.play = true;
+        }
+        refreshAll(['data', 'done']);
     });
 
     $(document).on('click', '#tp_filter_clear', function (event) {
@@ -96,41 +119,31 @@ $(document).ready( function () {
     });
 
     $(document).on('click', '#tp-show-hide', function (event) {
-
-        var state = (state_ids.tp_quiz_state == 'Show' ? 'Hide' : 'Show');
-
-        $('#tp-show-hide').text(state);
-        state_ids.tp_quiz_state = state;
-
-        store_state();
-
-        refresh_all();
-
+        tp.state.quiz.state = (tp.state.quiz.state == 'Show' ? 'Hide' : 'Show');
+        refreshAll(['visibleFields']);
     });
 
     $(document).on('click', '.tp-toggle', function (event) {
 
         var id = this.id;
-        var index = state_ids.tp_quiz_shown.indexOf(id);
+        var index = tp.state.quiz.visibleFields.indexOf(id);
 
         if (index > -1){
-            state_ids.tp_quiz_shown.splice(index, 1);
+            tp.state.quiz.visibleFields.splice(index, 1);
             $('.' + id).attr('data-state', 'off');
         } else {
-            state_ids.tp_quiz_shown.push(id);
+            tp.state.quiz.visibleFields.push(id);
             $('.' + id).attr('data-state', 'on');
         }
 
-        store_state();
-
-        refresh_all();
+        refreshAll(['visibleFields']);
 
     });
 
     $(document).on('click', '#tp-canvas-clear', function (event) {
         // Use the identity matrix while clearing the canvas
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        tp.draw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        tp.draw.ctx.clearRect(0, 0, tp.draw.ctx.canvas.width, tp.draw.ctx.canvas.height);
     });
 
     $(document).on('shown.bs.modal', '#tp_modal_card', function (event) {
@@ -525,9 +538,15 @@ function refreshDatatableExample(){
     }
 }
 
-function refreshDatatableQuiz(){
+function refreshDatatableQuiz(items){
+
+    tp.quiz.doneId  = (items.includes('done') ? tp.state.quiz.data.card.id : null);
+    tp.quiz.reset  = (items.includes('reset') ? "reset" : "noreset");
+
     if ('quiz' in tp.dt){
-        tp.dt.quiz.ajax.reload();
+        tp.dt.quiz.ajax.reload(function(json) {
+            refreshQuizData(json.priv);
+        });
     } else {
         tp.dt.quiz = $('#tp_quiz_table').DataTable({
             paging: false,
@@ -539,6 +558,15 @@ function refreshDatatableQuiz(){
             ajax: {
                 url: '/datatable',
                 headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+                data: {
+                    tpApp : 'quiz',
+                    tpUserData: function() { return tp.state.filter.user; },
+                    tpLabelData: function() { return tp.state.filter.label; },
+                    tpCardData: function() { return tp.state.filter.card; },
+                    tpExampleData: function() { return tp.state.filter.example; },
+                    tpDoneData: function() { return tp.quiz.doneId },
+                    tpResetData: function() { return tp.quiz.reset},
+                }
             },
             columnDefs: [{
                 visible: false, 
@@ -562,8 +590,8 @@ function refreshDatatableQuiz(){
                 { data: 'example' },
                 { data: 'translation' },
             ],
-            initComplete: function(settings, json, example_id) {
-                update_html();
+            initComplete: function(settings, json, example_id,) {
+                refreshQuizData(json.priv);
             }
         });
     }
@@ -647,87 +675,80 @@ function clearFilters(){
     });
 }
 
-function populate_quiz(){
+function refreshQuizData(data){
 
-    // populate page
-    if (!state_data.tp_quiz_data){
-        return;
-    }
-    var total = state_data.tp_quiz_data.stats.total;
-    var remaining = state_data.tp_quiz_data.stats.remaining;
-    $('#tp-stats').text('(' + remaining + '/' + total + ')');
+    tp.state.quiz.data = data;
 
-    $('.tp-toggle-symbol').text(state_data.tp_quiz_data.symbol);
-    $('.tp-toggle-pinyin').text(state_data.tp_quiz_data.pinyin);
-    $('.tp-toggle-translation').text(state_data.tp_quiz_data.translation);
-    $('.tp-toggle-example').text(state_data.tp_quiz_data.example);
-    $('.tp-toggle-comment').text(state_data.tp_quiz_data.comment);
-    $('.tp-toggle-label').text(state_data.tp_quiz_data.labels.join());
-    if (state_data.tp_quiz_data.url == ''){
-        $('.tp-has-audio').hide();
-        $('.tp-no-audio').show();
-    } else {
-        $('.tp-has-audio').show();
-        $('.tp-no-audio').hide();
-    }
+    // update quiz button text
+    $('#tp-show-hide').text(tp.state.quiz.state);
+
+    // show statistics
+    $('#tp-stats').text('(' + data.remain + '/' + data.total + ')');
 
     // display card or not
-    if (state_ids.tp_quiz_id == null){
+    if (data.card == null){
+
         $('#tp_quiz .tp-has-card').hide();
         $('#tp_quiz .tp-no-card').show();
+
+        $('#tp_quiz').show();
+
     } else {
+
+        var card = data.card;
+
         $('#tp_quiz .tp-has-card').show();
         $('#tp_quiz .tp-no-card').hide();
+
+        $('.tp-toggle-symbol').text(card.symbol);
+        $('.tp-toggle-pinyin').text(card.pinyin);
+        $('.tp-toggle-translation').text(card.translation);
+        $('.tp-toggle-comment').text(card.comment);
+        // $('.tp-toggle-label').text(card.labels.join());
+
+        $('#tp-card-audio').data('path', tp.state.quiz.data.url);
+        if (tp.state.quiz.data.url == ''){
+            $('.tp-has-audio').hide();
+            $('.tp-no-audio').show();
+        } else {
+            $('.tp-has-audio').show();
+            $('.tp-no-audio').hide();
+        }
+
+        // audio playback
+        if (tp.quiz.play == true){
+            tp.quiz.play = false;
+            $("#tp-card-audio").trigger('click');
+            console.log('play');
+        } else {
+            console.log('noplay');
+        }
+
+        refreshVisibleFields();
+
+        $('#tp_quiz').show();
     }
-
-    // update quiz display status
-    $('#tp-show-hide').text(state_ids.tp_quiz_state);
-
 }
 
-function init_quiz(){
+function refreshVisibleFields(){
 
+        $('#tp-show-hide').text(tp.state.quiz.state);
 
-    return;
-    populate_quiz();
-
-    // display item or not
-    $('#tp_quiz [data-state="on"]').show();
-    $('#tp_quiz [data-state="off"]').show();
-    if (state_ids.tp_quiz_shown.length > 0){
-        $('.' + state_ids.tp_quiz_shown.join(', .')).attr('data-state', 'on');
-    }
-
-    // update fields shown
-    refresh_all();
-}
-
-function update_html(){
-
-    // update visible app
-    $('#tp_label, #tp_card, #tp_example, #tp_quiz').not('tp_' + state_ids.tp_app).hide();
-    $('#tp_' + state_ids.tp_app).show();
-
-
-    // update navigation link
-    $('.tp_link[data-app="' + state_ids.tp_app + '"]').parent().addClass('active');
-
-}
-
-function refresh_quiz(){
-
-    $('#tp_quiz [data-state="on"]').show();
-
-    if (state_ids.tp_quiz_state == 'Hide') {
+        // display item or not
+        $('#tp_quiz [data-state="on"]').show();
         $('#tp_quiz [data-state="off"]').show();
-    } else {
-        $('#tp_quiz [data-state="off"]').hide();
-    }
+        if (tp.state.quiz.visibleFields.length > 0){
+            $('.' + tp.state.quiz.visibleFields.join(', .')).attr('data-state', 'on');
+        }
 
-    // playback
-    if (false){
-        $(".tp-audio").trigger('click');
-    }
+        $('#tp_quiz [data-state="on"]').show();
+
+        if (tp.state.quiz.state == 'Hide') {
+            $('#tp_quiz [data-state="off"]').show();
+        } else {
+            $('#tp_quiz [data-state="off"]').hide();
+        }
+
 }
 
 function switchToLabel(){
@@ -740,6 +761,10 @@ function switchToCard(){
 
 function switchToExample(){
     refreshDatatableExample();
+}
+
+function switchToQuiz(items){
+    refreshDatatableQuiz(items);
 }
 
 function refreshAll(items){
@@ -758,7 +783,7 @@ function refreshAll(items){
                 switchToExample();
                 break;
             case 'quiz':
-                switchToQuiz();
+                switchToQuiz(items);
                 break;
         }
 
@@ -783,9 +808,13 @@ function refreshAll(items){
                 refreshDatatableExample();
                 break;
             case 'quiz':
-                refreshDatatableQuiz();
+                refreshDatatableQuiz(items);
                 break;
         }
+    }
+
+    if (items.includes('visibleFields')){
+        refreshVisibleFields();
     }
 
     // update filter content
@@ -793,8 +822,6 @@ function refreshAll(items){
 
     var data = JSON.stringify(tp.state);
     sessionStorage.setItem('flashcard', data);
-    console.log(tp);
-            
 
 }
 
@@ -831,7 +858,7 @@ function getInitState(){
 function initCanvas() {
 
     var canvas = document.querySelector('#tp-canvas');
-    ctx = canvas.getContext("2d");
+    tp.draw.ctx = canvas.getContext("2d");
 
     // prevent canvas stretching by setting the canvas size to the element's size
     canvas.width = canvas.offsetWidth;
@@ -839,7 +866,7 @@ function initCanvas() {
 
     // add touch event handler (for tablets)
     canvas.addEventListener("touchstart", function (e) {
-        touchPressed = true;
+        tp.draw.touchPressed = true;
         var touch = e.touches[0];
         x = touch.pageX - $(this).offset().left;
         y = touch.pageY - $(this).offset().top;
@@ -847,7 +874,7 @@ function initCanvas() {
     });
 
     canvas.addEventListener("touchmove", function (e) {
-        if (touchPressed) {
+        if (tp.draw.touchPressed) {
             var touch = e.touches[0];
             x = touch.pageX - $(this).offset().left;
             y = touch.pageY - $(this).offset().top;
@@ -856,23 +883,23 @@ function initCanvas() {
     });
 
     canvas.addEventListener("touchend", function (e) {
-        touchPressed = false;
+        tp.draw.touchPressed = false;
     });
 
     canvas.addEventListener("touchcancel", function (e) {
-        touchPressed = false;
+        tp.draw.touchPressed = false;
     });
 
     // add mouse event handler
     $('#tp-canvas').mousedown(function (e) {
-        mousePressed = true;
+        tp.draw.mousePressed = true;
         x = e.pageX - $(this).offset().left;
         y = e.pageY - $(this).offset().top;
         drawMouseCanvas(x, y, false);
     });
 
     $('#tp-canvas').mousemove(function (e) {
-        if (mousePressed) {
+        if (tp.draw.mousePressed) {
             x = e.pageX - $(this).offset().left;
             y = e.pageY - $(this).offset().top;
             drawMouseCanvas(x, y, true);
@@ -880,39 +907,39 @@ function initCanvas() {
     });
 
     $('#tp-canvas').mouseup(function (e) {
-        mousePressed = false;
+        tp.draw.mousePressed = false;
     });
 
     $('#tp-canvas').mouseleave(function (e) {
-        mousePressed = false;
+        tp.draw.mousePressed = false;
     });
 }
 
 function drawTouchCanvas(x, y, isDown) {
     if (isDown) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        ctx.lineJoin = "round";
-        ctx.moveTo(lastTouchX, lastTouchY);
-        ctx.lineTo(x, y);
-        ctx.closePath();
-        ctx.stroke();
+        tp.draw.ctx.beginPath();
+        tp.draw.ctx.strokeStyle = 'black';
+        tp.draw.ctx.lineWidth = 1;
+        tp.draw.ctx.lineJoin = "round";
+        tp.draw.ctx.moveTo(tp.draw.lastTouchX, tp.draw.lastTouchY);
+        tp.draw.ctx.lineTo(x, y);
+        tp.draw.ctx.closePath();
+        tp.draw.ctx.stroke();
     }
-    lastTouchX = x; lastTouchY = y;
+    tp.draw.lastTouchX = x; tp.draw.lastTouchY = y;
 }
 
 function drawMouseCanvas(x, y, isDown) {
     if (isDown) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 1;
-        ctx.lineJoin = "round";
-        ctx.moveTo(lastMouseX, lastMouseY);
-        ctx.lineTo(x, y);
-        ctx.closePath();
-        ctx.stroke();
+        tp.draw.ctx.beginPath();
+        tp.draw.ctx.strokeStyle = 'black';
+        tp.draw.ctx.lineWidth = 1;
+        tp.draw.ctx.lineJoin = "round";
+        tp.draw.ctx.moveTo(tp.draw.lastMouseX, tp.draw.lastMouseY);
+        tp.draw.ctx.lineTo(x, y);
+        tp.draw.ctx.closePath();
+        tp.draw.ctx.stroke();
     }
 
-    lastMouseX = x; lastMouseY = y;
+    tp.draw.lastMouseX = x; tp.draw.lastMouseY = y;
 }

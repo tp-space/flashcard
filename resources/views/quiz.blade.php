@@ -31,7 +31,7 @@
 
                 <button id="tp-toggle-audio" class="btn btn-sm btn-link tp-toggle">Sound:</button>
                 <span class="tp-toggle-audio" data-state="off">
-                    <button class="btn btn-sm btn-primary tp-audio tp-has-audio" data-path="">
+                    <button id="tp-card-audio" class="btn btn-sm btn-primary tp-audio tp-has-audio" data-path="">
                         <i class="fa fa-play"></i>
                     </button>
                     <span class="tp-no-audio">No audio file available</span>

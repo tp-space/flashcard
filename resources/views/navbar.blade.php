@@ -18,35 +18,35 @@
 
                 @php ($app = \App\Http\Controllers\MainController::MAIN_LABEL)
                 <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
-                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                    <a class="nav-link tp_link" data-toggle="collapse" data-target=".navbar-collapse.show" href="#" data-app="{{ $app }}">
                         Labels<span class="sr-only">(current)</span>
                     </a>
                 </li>
 
                 @php ($app = \App\Http\Controllers\MainController::MAIN_CARD)
                 <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
-                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                    <a class="nav-link tp_link" data-toggle="collapse" data-target=".navbar-collapse.show" href="#" data-app="{{ $app }}">
                         Cards<span class="sr-only">(current)</span>
                     </a>
                 </li>
 
                 @php ($app = \App\Http\Controllers\MainController::MAIN_EXAMPLE)
                 <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
-                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                    <a class="nav-link tp_link" data-toggle="collapse" data-target=".navbar-collapse.show" href="#" data-app="{{ $app }}">
                         Examples<span class="sr-only">(current)</span>
                     </a>
                 </li>
 
                 @php ($app = \App\Http\Controllers\MainController::MAIN_QUIZ)
                 <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
-                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                    <a class="nav-link tp_link" data-toggle="collapse" data-target=".navbar-collapse.show" href="#" data-app="{{ $app }}">
                         Quiz<span class="sr-only">(current)</span>
                     </a>
                 </li>
 
                 @php ($app = \App\Http\Controllers\MainController::MAIN_STATS)
                 <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
-                    <a class="nav-link tp_link" href="#" data-app="{{ $app }}">
+                    <a class="nav-link tp_link" data-toggle="collapse" data-target=".navbar-collapse.show" href="#" data-app="{{ $app }}">
                         Stats<span class="sr-only">(current)</span>
                     </a>
                 </li>

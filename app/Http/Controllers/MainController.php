@@ -48,7 +48,7 @@ class MainController extends Controller
         return view('main', compact('userData'));
     }
 
-    private static function getLabels($filters){
+    private function getLabels($filters){
 
         // get labels
         $labels = Label::withCount('cards')->with('cards.examples')->where('user_id', $filters['userId']);
@@ -69,10 +69,13 @@ class MainController extends Controller
                     ->wherein('example.id', $filters["exampleIds"]); 
             });
         }
-        return $labels;
+        return [
+            'data' => $labels,
+            'priv' => null,
+        ];
     }
 
-    public static function getCards($filters){
+    private function getCards($filters){
 
         // get cards
         $cards = Card::withCount(['labels', 'examples'])->where('user_id', $filters['userId']);
@@ -93,10 +96,13 @@ class MainController extends Controller
                     ->wherein('example.id', $filters['exampleIds']); 
             });
         }
-        return $cards;
+        return [
+            'data' => $cards,
+            'priv' => null,
+        ];
     }
 
-    private static function getExamples($filters){
+    private function getExamples($filters){
 
         // get examples
         $examples = Example::withCount('cards')->with('cards.labels')->where('user_id', $filters["userId"]);
@@ -118,44 +124,75 @@ class MainController extends Controller
             });
         }
 
-        return $examples;
+        return [
+            'data' => $examples,
+            'priv' => null,
+        ];
     }
 
-    private static function getQuiz($state){
+    private function getQuiz($filters){
+
+        $cards = $this->getCards($filters)["data"]; 
+        $countTotal = $cards->count();
+
+        $remain = $cards->where('done', false);
+        $countRemain = $remain->count();
+
+        // No cards left in the stack => quiz is over
+        if ($countRemain == 0){
+            return [
+                'data' => $remain,
+                'priv' => [
+                    'card' => null,
+                    'url' => '',
+                    'total' => $countTotal,
+                    'remain' => $countRemain,
+                ],
+            ];
+        }
+
+        // get random card
+        $card = $remain->offset(random_int(0, $countRemain-1))->first();
+
+        // get audio file
+        $url = "";
+        $path = AudioController::getAudioFilePath(AudioController::CARD, $card->id);
+        if (file_exists($path["fs"])){
+            $url = $path["url"];
+        }
 
         // get examples
-        $examples = Example::withCount('cards')->with('cards.labels')->where('user_id', $state["tp_user_id"]);
-        if (count($state["tp_example_ids"]) > 0){
-            $examples = $examples->wherein('id', $state["tp_example_ids"]); 
-        }
-        $cardId = $state["tp_quiz_id"];
-        if ((count($state["tp_card_ids"]) > 0) && (false == in_array($state["tp_quiz_id"], $state["tp_card_ids"]))){
-            $cardId = 0;
-        }
-        $examples = $examples->whereHas('cards', function($query) use ($cardId) {
-            $query->where('card.id', $cardId); 
+        $examples = Example::with('cards')->whereHas('cards', function($query) use ($card) {
+            $query->where('card.id', $card->id); 
         });
-        if (count($state["tp_label_ids"]) > 0){
-            $examples = $examples->whereHas('cards.labels', function($query) use ($state) {
-                $query->wherein('label.id', $state["tp_label_ids"]); 
-            });
-        }
 
-        return $examples;
+        return [
+            'data' => $examples,
+            'priv' => [
+                'card' => $card,
+                'url' => $url,
+                'total' => $countTotal,
+                'remain' => $countRemain,
+            ],
+        ];
     }
 
     public function datatable(Request $request)
     {
+
+        $begin = microtime(true);
 
         $columns = $request->get('columns');
         $start = $request->get("start");
         $length = $request->get("length");
         $search = $request->get("search")["value"];
         $order = $request->get("order");
+        $draw = $request->get('draw');
 
         $orderCol = $columns[$order[0]["column"]]["data"];
         $orderDir = $order[0]["dir"];
 
+        // get app context
         $app = $request->get("tpApp");
         $filters = [
             'userId' => array_column(json_decode($request->get("tpUserData")), 'id')[0],
@@ -164,25 +201,47 @@ class MainController extends Controller
             'exampleIds' => array_column(json_decode($request->get("tpExampleData")), 'id'),
         ];
 
+        // set card to done
+        $doneId = $request->get("tpDoneData");
+        if ($doneId){
+            $card = Card::find($doneId);
+            $card->done = true;
+            $card->save();
+        }
+
+        // reset cards
+        $reset = $request->get("tpResetData");
+        if ($reset === "reset"){
+            $this->getCards($filters)["data"]->where('done', true)->update(['done' => false]);
+        }
 
         $req = null;
         switch($app){
         case MainController::MAIN_LABEL:
-            $req = self::getLabels($filters);
+            $tmp = $this->getLabels($filters);
+            $req = $tmp["data"];
+            $priv = $tmp["priv"];
             break;
         case MainController::MAIN_CARD:
-            $req = self::getCards($filters);
+            $tmp = $this->getCards($filters);
+            $req = $tmp["data"];
+            $priv = $tmp["priv"];
             break;
         case MainController::MAIN_EXAMPLE:
-            $req = self::getExamples($filters);
+            $tmp = $this->getExamples($filters);
+            $req = $tmp["data"];
+            $priv = $tmp["priv"];
             break;
         case MainController::MAIN_QUIZ:
-            $req = self::getQuiz($filters);
+            $tmp = $this->getQuiz($filters);
+            $req = $tmp["data"];
+            $priv = $tmp["priv"];
             break;
         default:
             return Response::json([]);
         }
 
+        error_log('before count' . strval( microtime(true) - $begin));
 
         // total items
         $total = $req->count();
@@ -204,6 +263,7 @@ class MainController extends Controller
             });
         }
 
+        error_log('before filtered count' . strval( microtime(true) - $begin));
         // total filter cards
         $totalFiltered = $req->count();
 
@@ -222,7 +282,10 @@ class MainController extends Controller
             $req = $req->offset($start)->limit($length);
         }
 
+        error_log('before sql' . strval( microtime(true) - $begin));
+
         $req = $req->get();
+        error_log('after sql' . strval( microtime(true) - $begin));
 
         $data = [];
         foreach($req as $row){
@@ -245,22 +308,20 @@ class MainController extends Controller
                     break;
                 case "labels":
                     $item["labels"] = [
-                        "ids" => $row->labels->pluck('id')->toArray(),
                         "text" => htmlentities(implode(', ', $row->labels->pluck('label')->toArray())),
                         "count" => $row->labels_count,
                     ];
                     break;
                 case "cards":
                     $item["cards"] = [
-                        "ids" => $row->cards->pluck('id')->toArray(),
-                        "text" => htmlentities(implode(', ', $row->cards->pluck('symbol')->toArray())),
+                        "text" => '', //htmlentities(implode(', ', $row->cards->pluck('symbol')->toArray())),
                         "count" => $row->cards_count,
                     ];
                     break;
                 case "examples":
                     $item["examples"] = [
-                        "ids" => $row->examples->pluck('id')->toArray(),
                         "text" => htmlentities(implode(', ', $row->examples->pluck('example')->toArray())),
+                        "text" => '',
                         "count" => $row->examples_count,
                     ];
                     break;
@@ -274,13 +335,14 @@ class MainController extends Controller
             $data[] = $item;
         }
 
-        $draw = $request->get('draw');
+        error_log('after processing ' . strval( microtime(true) - $begin));
 
         $response = [
             "draw" => intval($draw),
             "iTotalRecords" => $total,
             "iTotalDisplayRecords" => $totalFiltered,
             "aaData" => $data,
+            "priv" => $priv,
         ];
 
         return Response::json($response);
