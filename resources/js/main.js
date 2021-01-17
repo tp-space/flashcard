@@ -28,9 +28,6 @@ $(document).ready( function () {
     // Initialize user selects
     initUserSelect();
 
-    // initialize canvas
-    initCanvas();
-
     // initialize tooltip
     $('[data-toggle="tooltip"]').tooltip();
 
@@ -39,7 +36,6 @@ $(document).ready( function () {
     $(document).on('click', '.tp-audio', function (event) {
 
         var src = $(this).data('path');
-        console.log('src', src);
         var audio = new Audio(src);
         audio.load();
         audio.play();
@@ -127,13 +123,10 @@ $(document).ready( function () {
 
         var id = this.id;
         var index = tp.state.quiz.visibleFields.indexOf(id);
-
-        if (index > -1){
-            tp.state.quiz.visibleFields.splice(index, 1);
-            $('.' + id).attr('data-state', 'off');
-        } else {
+        if (index == -1){
             tp.state.quiz.visibleFields.push(id);
-            $('.' + id).attr('data-state', 'on');
+        } else {
+            tp.state.quiz.visibleFields.splice(index, 1);
         }
 
         refreshAll(['visibleFields']);
@@ -144,6 +137,16 @@ $(document).ready( function () {
         // Use the identity matrix while clearing the canvas
         tp.draw.ctx.setTransform(1, 0, 0, 1, 0, 0);
         tp.draw.ctx.clearRect(0, 0, tp.draw.ctx.canvas.width, tp.draw.ctx.canvas.height);
+    });
+
+    $(window).on('resize', function(){
+
+        // resize canvas
+        if (tp.draw.ctx){
+            tp.draw.ctx.canvas.width = tp.draw.ctx.canvas.offsetWidth;
+            tp.draw.ctx.canvas.height = tp.draw.ctx.canvas.offsetHeight;
+        }
+
     });
 
     $(document).on('shown.bs.modal', '#tp_modal_card', function (event) {
@@ -679,9 +682,6 @@ function refreshQuizData(data){
 
     tp.state.quiz.data = data;
 
-    // update quiz button text
-    $('#tp-show-hide').text(tp.state.quiz.state);
-
     // show statistics
     $('#tp-stats').text('(' + data.remain + '/' + data.total + ')');
 
@@ -704,7 +704,7 @@ function refreshQuizData(data){
         $('.tp-toggle-pinyin').text(card.pinyin);
         $('.tp-toggle-translation').text(card.translation);
         $('.tp-toggle-comment').text(card.comment);
-        // $('.tp-toggle-label').text(card.labels.join());
+        $('.tp-toggle-label').text(tp.state.quiz.data.labels.join(', '));
 
         $('#tp-card-audio').data('path', tp.state.quiz.data.url);
         if (tp.state.quiz.data.url == ''){
@@ -719,36 +719,42 @@ function refreshQuizData(data){
         if (tp.quiz.play == true){
             tp.quiz.play = false;
             $("#tp-card-audio").trigger('click');
-            console.log('play');
-        } else {
-            console.log('noplay');
         }
 
         refreshVisibleFields();
 
         $('#tp_quiz').show();
+
+        if (tp.draw.ctx == null){ 
+            // initialization must happen when canvas is visible
+            initCanvas();
+        }
     }
 }
 
 function refreshVisibleFields(){
 
+        // set button text
         $('#tp-show-hide').text(tp.state.quiz.state);
 
-        // display item or not
-        $('#tp_quiz [data-state="on"]').show();
-        $('#tp_quiz [data-state="off"]').show();
-        if (tp.state.quiz.visibleFields.length > 0){
-            $('.' + tp.state.quiz.visibleFields.join(', .')).attr('data-state', 'on');
-        }
+        $('#tp_quiz .tp-toggle').each(function (index, item){
 
-        $('#tp_quiz [data-state="on"]').show();
+            // update visible items
+            if ((tp.state.quiz.state == 'Hide') || (tp.state.quiz.visibleFields.indexOf(item.id) > -1)){
+                $('.' + item.id).show();
+            } else {
+                $('.' + item.id).hide();
+            }
 
-        if (tp.state.quiz.state == 'Hide') {
-            $('#tp_quiz [data-state="off"]').show();
-        } else {
-            $('#tp_quiz [data-state="off"]').hide();
-        }
-
+            // update label color
+            if (tp.state.quiz.visibleFields.indexOf(item.id) > -1){
+                $('#' + item.id).addClass('text-success');
+                $('#' + item.id).removeClass('text-danger');
+            } else {
+                $('#' + item.id).addClass('text-danger');
+                $('#' + item.id).removeClass('text-success');
+            }
+        });
 }
 
 function switchToLabel(){
@@ -770,7 +776,6 @@ function switchToQuiz(items){
 function refreshAll(items){
 
     if (items.includes('app')){
-        console.log('app');
 
         switch (tp.state.app){
             case 'label':
@@ -829,7 +834,7 @@ function getInitState(){
 
     // Initialize state
     var tmp = sessionStorage.getItem('flashcard');
-    tmp = null;
+    //tmp = null;
     if (tmp == null){
 
         tp.state = {};
@@ -846,11 +851,8 @@ function getInitState(){
         tp.state.quiz.state = "Show";
         tp.state.quiz.visibleFields = [];
 
-        console.log("initial state created");
-
     } else {
         tp.state = JSON.parse(tmp);
-        console.log("initial state retrieved");
     }
 
 }
@@ -861,8 +863,8 @@ function initCanvas() {
     tp.draw.ctx = canvas.getContext("2d");
 
     // prevent canvas stretching by setting the canvas size to the element's size
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    tp.draw.ctx.canvas.width = tp.draw.ctx.canvas.offsetWidth;
+    tp.draw.ctx.canvas.height = tp.draw.ctx.canvas.offsetHeight;
 
     // add touch event handler (for tablets)
     canvas.addEventListener("touchstart", function (e) {

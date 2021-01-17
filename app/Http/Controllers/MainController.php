@@ -144,6 +144,7 @@ class MainController extends Controller
                 'data' => $remain,
                 'priv' => [
                     'card' => null,
+                    'labels' => '',
                     'url' => '',
                     'total' => $countTotal,
                     'remain' => $countRemain,
@@ -170,6 +171,7 @@ class MainController extends Controller
             'data' => $examples,
             'priv' => [
                 'card' => $card,
+                'labels' => $card->labels->pluck('label'),
                 'url' => $url,
                 'total' => $countTotal,
                 'remain' => $countRemain,
