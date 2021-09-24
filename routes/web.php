@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FilterController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\MainController;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +26,18 @@ Route::middleware('auth')->group(function () {
 
     // set routes for apps
     Route::get('/main', [MainController::class, 'index']);
+
+    // new, edit, clone labels
+    Route::post('/labels/store', [MainController::class, 'store_labels']);
+    Route::post('/labels/delete', [MainController::class, 'delete_labels']);
+
+    // new, edit, clone cards
+    Route::post('/cards/store', [MainController::class, 'store_cards']);
+    Route::post('/cards/delete', [MainController::class, 'delete_cards']);
+
+    // new, edit, clone cards
+    Route::post('/examples/store', [MainController::class, 'store_examples']);
+    Route::post('/examples/delete', [MainController::class, 'delete_examples']);
 
     // set routes for quiz
     Route::get('/quiz/done/{id}', [QuizController::class, 'setDone']);

@@ -19,48 +19,74 @@
 
             <div>
 
-                <button id="tp-toggle-label" class="btn btn-sm btn-link tp-toggle">Labels:</button>
-                <span class="tp-toggle-label"></span>
+                <div class="row">
+                    <button id="tp-toggle-label" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Labels:</button>
+                    <div class="col-sm-9">
+                        <span class="tp-toggle-label"></span>
+                    </div>
+                </div>
 
             </div>
             <div>
 
-                <button id="tp-toggle-audio" class="btn btn-sm btn-link tp-toggle">Sound:</button>
-                <span class="tp-toggle-audio">
-                    <button id="tp-card-audio" class="btn btn-sm btn-primary tp-audio tp-has-audio" data-path="">
-                        <i class="fa fa-play"></i>
-                    </button>
-                    <span class="tp-no-audio">No audio file available</span>
-                </span>
+                <div class="row">
+                    <button id="tp-toggle-audio" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Sound:</button>
+                    <div class="col-sm-9">
+                        <span class="tp-toggle-audio">
+                            <button id="tp-card-audio" class="btn btn-sm btn-primary tp-audio tp-has-audio" data-path="">
+                                <i class="fa fa-play"></i>
+                            </button>
+                            <span class="tp-no-audio">No audio file available</span>
+                        </span>
+                    </div>
+                </div>
 
             </div>
             <div>
 
-                <button id="tp-toggle-symbol" class="btn btn-sm btn-link tp-toggle">Symbol:</button>
-                <span class="h1 tp-toggle-symbol"></span>
+                <div class="row">
+                    <button id="tp-toggle-symbol" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Symbol:</button>
+                    <div class="col-sm-9">
+                        <strong><span class="h2 tp-toggle-symbol"></span></strong>
+                    </div>
+                </div>
 
             </div>
             <div>
 
-                <button id="tp-toggle-pinyin" class="btn btn-sm btn-link tp-toggle">Pinyin:</button>
-                <span class="tp-toggle-pinyin"></span>
+                <div class="row">
+                    <button id="tp-toggle-pinyin" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Pinyin:</button>
+                    <div class="col-sm-9">
+                        <span class="tp-toggle-pinyin"></span>
+                    </div>
+                </div>
 
             </div>
             <div>
 
-                <button id="tp-toggle-translation" class="btn btn-sm btn-link tp-toggle">Translation:</button>
-                <span class="tp-toggle-translation"></span>
+                <div class="row">
+                    <button id="tp-toggle-translation" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Translation:</button>
+                    <div class="col-sm-9">
+                        <span class="tp-toggle-translation"></span>
+                    </div>
+                </div>
 
             </div>
             <div>
 
-                <button id="tp-toggle-comment" class="btn btn-sm btn-link tp-toggle">Comment:</button>
-                <span class="tp-toggle-comment"></span>
+                <div class="row">
+                    <button id="tp-toggle-comment" class="btn btn-sm btn-link tp-toggle col-sm-12 text-left">Comment:</button>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <span class="tp-toggle-comment"></span>
+                    </div>
+                </div>
 
             </div>
         </div>
-        <div class="col-md-6" style="height: 400px">
-            <button id="tp-canvas-clear" class="btn btn-warning" style="width: 100%;height: 10%;">Clear Drawing</button>
+        <div class="col-md-6" style="height: 300px">
+            <button id="tp-canvas-clear" class="btn btn-secondary" style="width: 100%;height: 10%;">Clear Drawing</button>
             <canvas id="tp-canvas" style="width: 100%;height: 90%;border: 2px solid black; touch-action: none;"></canvas>
         </div>
     </div>

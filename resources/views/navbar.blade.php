@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-sm navbar-dark bg-dark">
 
     <div class="container">
         <a class="navbar-brand" href="/">Flashcard</a>
@@ -43,15 +43,15 @@
                         Quiz<span class="sr-only">(current)</span>
                     </a>
                 </li>
-
+{{--
                 @php ($app = \App\Http\Controllers\MainController::MAIN_STATS)
                 <li class="nav-item {{ $sel == $app ? 'active' : '' }}">
                     <a class="nav-link tp_link" data-toggle="collapse" data-target=".navbar-collapse.show" href="#" data-app="{{ $app }}">
                         Stats<span class="sr-only">(current)</span>
                     </a>
                 </li>
+--}}
             </ul>
-
             <!-- Right Side Of Navbar -->
             <ul class="navbar-nav ml-auto">
                 <!-- Authentication Links -->

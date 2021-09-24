@@ -1,3 +1,4 @@
+<!-- The Modal Delete -->
 <div class="modal" id="tp_modal_example_delete">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -10,21 +11,20 @@
 
             <!-- Modal body -->
             <div class="modal-body">
-
-                <form id="tp_modal_example_delete_form" action="/examples" method="post">
-                    @csrf
-                    @method('delete')
-                    <p id="tp_modal_example_delete_text"></p>
+                <form id="tp_example_delete_form">
+                    <input type="hidden" id="tp_example_delete_id" name="tp_example_delete_id">
+                    <input type="hidden" id="tp_example_delete_user_id" name="tp_example_delete_user_id">
+                    <p id="tp_example_delete_text"></p>
                 </form>
-
             </div>
 
             <!-- Modal footer -->
             <div class="modal-footer">
-                <button type="submit" class="btn btn-danger" form="tp_modal_example_delete_form">Delete</button>
-                <button type="button" class="btn btn-standard" data-dismiss="modal">Close</button>
+                <button type="button" data-dismiss="modal" id="tp_example_delete" class="btn btn-danger">Delete</button>
+                <button type="button" data-dismiss="modal" class="btn btn-standard">Close</button>
             </div>
 
         </div>
     </div>
 </div>
+

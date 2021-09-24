@@ -11,19 +11,17 @@
 
             <!-- Modal body -->
             <div class="modal-body">
-
-                <form id="tp_modal_card_delete_form" action="/cards" method="post">
-                    @csrf
-                    @method('delete')
-                    <p id="tp_modal_card_delete_text"></p>
+                <form id="tp_card_delete_form">
+                    <input type="hidden" id="tp_card_delete_id" name="tp_card_delete_id">
+                    <input type="hidden" id="tp_card_delete_user_id" name="tp_card_delete_user_id">
+                    <p id="tp_card_delete_text"></p>
                 </form>
-
             </div>
 
             <!-- Modal footer -->
             <div class="modal-footer">
-                <button type="submit" class="btn btn-danger" form="tp_modal_card_delete_form">Delete</button>
-                <button type="button" class="btn btn-standard" data-dismiss="modal">Close</button>
+                <button type="button" data-dismiss="modal" id="tp_card_delete" class="btn btn-danger">Delete</button>
+                <button type="button" data-dismiss="modal" class="btn btn-standard">Close</button>
             </div>
 
         </div>

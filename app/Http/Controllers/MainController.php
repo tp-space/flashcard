@@ -48,6 +48,327 @@ class MainController extends Controller
         return view('main', compact('userData'));
     }
 
+    public function store_labels(Request $request){
+
+        $id = 0;
+        $msg = "";
+
+        do {
+
+            // get user id
+            $user = $request->get("tp_label_user_id", null);
+            if ($user){
+                $userId = json_decode($user)[0]->id;
+            } else {
+                $msg = "Unknown user id";
+                break;
+            }
+
+            $id = $request->get("tp_label_id", 0);
+            if ($id > 0){
+                // update existing label
+                $label = Label::where('id', $id)
+                    ->where('user_id', $userId)
+                    ->first();
+                if ($label == null){
+                    $msg = "Unable to find label " . $id;
+                    break;
+                }
+                $opType = " has been updated";
+            } else {
+                // add new label
+                $label = new Label;
+                $opType = " has been added";
+            }
+
+            // populate values
+            $label->label = $request->get("tp_label_label","<unknown>");
+            $label->user_id = $userId;
+            $label->save();
+
+            // update relationship
+            $label->cards()->sync($request->get("tp_label_cards", "[]"));
+
+            // generate data to be returned
+            $msg = "Label " . $label->label . " has been " . $opType;
+            $id = $label->id;
+
+        } while(0);
+
+        return Response::json([
+            "id" => $id,
+            "message" => $msg,
+        ]);
+    }
+
+    public function delete_labels(Request $request){
+
+        $id = 0;
+        $msg = "";
+
+        do {
+
+            // get user id
+            $user = $request->get("tp_label_delete_user_id", null);
+            if ($user){
+                $userId = json_decode($user)[0]->id;
+            } else {
+                $msg = "Unknown user id";
+                break;
+            }
+
+            // get label id
+            $id = $request->get("tp_label_delete_id", 0);
+            if ($id < 1){
+                $msg = "Label id is missing";
+                break;
+            }
+
+            // search label
+            $label = Label::where('id', $id)->where('user_id', $userId)->first();
+            if ($label == null){
+                $msg = "Unable to find label id " . $id;
+                $id = 0;
+                break;
+            }
+
+            // remove relationship and delete label
+            $label->cards()->detach();
+            $label->delete();
+
+            // create return message
+            $msg = "Label " . $label->label . " has been deleted";
+
+        } while (0);
+
+        return Response::json([
+            "id" => $id,
+            "message" => $msg,
+        ]);
+    }
+
+    public function store_cards(Request $request){
+
+        $id = 0;
+        $msg = "";
+
+        do {
+
+            // get user id
+            $user = $request->get("tp_card_user_id", null);
+            if ($user){
+                $userId = json_decode($user)[0]->id;
+            } else {
+                $msg = "Unknown user id";
+                break;
+            }
+
+            $id = $request->get("tp_card_id", 0);
+            if ($id > 0){
+                // update existing label
+                $card = Card::where('id', $id)
+                    ->where('user_id', $userId)
+                    ->first();
+                if ($card == null){
+                    $msg = "Unable to find card " . $id;
+                    break;
+                }
+                $done = $card->done;
+                $opType = " has been updated";
+            } else {
+                // add new label
+                $card = new Card;
+                $opType = " has been added";
+                $done = false;
+            }
+
+            // populate values
+            $card->user_id = $userId;
+            $card->symbol = $request->get("tp_card_symbol","<unknown>");
+            $card->pinyin = $request->get("tp_card_pinyin","<unknown>");
+            $card->translation = $request->get("tp_card_translation","<unknown>");
+            $card->comment = $request->input("tp_card_comment","<unknown>");
+            $card->comment = (is_null($card->comment) ? "" : $card->comment);
+            $card->done = $done;
+            $card->save();
+
+            // update relationship
+            $card->labels()->sync($request->get("tp_card_labels", []));
+            $card->examples()->sync($request->get("tp_card_examples", []));
+
+            // generate audio file
+            AudioController::generateAudioFile(AudioController::CARD, $card->id, $card->symbol);
+
+            // generate data to be returned
+            $msg = "Card " . $card->symbol . " has been " . $opType;
+            $id = $card->id;
+
+        } while(0);
+
+        return Response::json([
+            "id" => $id,
+            "message" => $msg,
+        ]);
+    }
+
+    public function delete_cards(Request $request){
+
+        $id = 0;
+        $msg = "";
+
+        do {
+
+            // get user id
+            $user = $request->get("tp_card_delete_user_id", null);
+            if ($user){
+                $userId = json_decode($user)[0]->id;
+            } else {
+                $msg = "Unknown user id";
+                break;
+            }
+
+            // get label id
+            $id = $request->get("tp_card_delete_id", 0);
+            if ($id < 1){
+                $msg = "Card id is missing";
+                break;
+            }
+
+            // search card
+            $card = Card::where('id', $id)->where('user_id', $userId)->first();
+            if ($card == null){
+                $msg = "Unable to find card id " . $id;
+                $id = 0;
+                break;
+            }
+
+            // remove relationship and delete label
+            $card->labels()->detach();
+            $card->examples()->detach();
+            $card->delete();
+
+            // Remove audio file
+            AudioController::deleteAudioFile(AudioController::CARD, $card->id);
+
+            // create return message
+            $msg = 'Card "' . $card->symbol . '" has been deleted';
+
+        } while (0);
+
+        return Response::json([
+            "id" => $id,
+            "message" => $msg,
+        ]);
+    }
+
+    public function store_examples(Request $request){
+
+        $id = 0;
+        $msg = "";
+
+        do {
+
+            // get user id
+            $user = $request->get("tp_example_user_id", null);
+            if ($user){
+                $userId = json_decode($user)[0]->id;
+            } else {
+                $msg = "Unknown user id";
+                break;
+            }
+
+            $id = $request->get("tp_example_id", 0);
+            if ($id > 0){
+                // update existing label
+                $example = Example::where('id', $id)
+                    ->where('user_id', $userId)
+                    ->first();
+                if ($example == null){
+                    $msg = "Unable to find example " . $id;
+                    break;
+                }
+                $done = $example->done;
+                $opType = " has been updated";
+            } else {
+                // add new label
+                $example = new Example;
+                $opType = " has been added";
+                $done = false;
+            }
+
+            // populate values
+            $example->user_id = $userId;
+            $example->example = $request->get("tp_example_example","<unknown>");
+            $example->translation = $request->get("tp_example_translation","<unknown>");
+            $example->save();
+
+            // update relationship
+            $example->cards()->sync($request->get("tp_example_cards", []));
+
+            // generate audio file
+            AudioController::generateAudioFile(AudioController::EXAMPLE, $example->id, $example->example);
+
+            // generate data to be returned
+            $msg = "Example " . $example->example . " has been " . $opType;
+            $id = $example->id;
+
+        } while(0);
+
+        return Response::json([
+            "id" => $id,
+            "message" => $msg,
+        ]);
+    }
+
+    public function delete_examples(Request $request){
+
+        $id = 0;
+        $msg = "";
+
+        do {
+
+            // get user id
+            $user = $request->get("tp_example_delete_user_id", null);
+            if ($user){
+                $userId = json_decode($user)[0]->id;
+            } else {
+                $msg = "Unknown user id";
+                break;
+            }
+
+            // get label id
+            $id = $request->get("tp_example_delete_id", 0);
+            if ($id < 1){
+                $msg = "Card id is missing";
+                break;
+            }
+
+            // search example
+            $example = Example::where('id', $id)->where('user_id', $userId)->first();
+            if ($example == null){
+                $msg = "Unable to find example id " . $id;
+                $id = 0;
+                break;
+            }
+
+            // remove relationship and delete label
+            $example->cards()->detach();
+            $example->delete();
+
+            // Remove audio file
+            AudioController::deleteAudioFile(AudioController::EXAMPLE, $example->id);
+
+            // create return message
+            $msg = 'Card "' . $example->symbol . '" has been deleted';
+
+        } while (0);
+
+        return Response::json([
+            "id" => $id,
+            "message" => $msg,
+        ]);
+    }
+
     private function getLabels($filters){
 
         // get labels
@@ -310,21 +631,24 @@ class MainController extends Controller
                     break;
                 case "labels":
                     $item["labels"] = [
-                        "text" => htmlentities(implode(', ', $row->labels->pluck('label')->toArray())),
-                        "count" => $row->labels_count,
+                        //"text" => htmlentities(implode(', ', $row->labels->pluck('label')->toArray())),
+                        //"count" => $row->labels_count,
+                        "data" => $row->labels->pluck('label', 'id')->toArray(),
                     ];
                     break;
                 case "cards":
                     $item["cards"] = [
-                        "text" => '', //htmlentities(implode(', ', $row->cards->pluck('symbol')->toArray())),
-                        "count" => $row->cards_count,
+                        //"text" => '', //htmlentities(implode(', ', $row->cards->pluck('symbol')->toArray())),
+                        //"count" => $row->cards_count,
+                        "data" => $row->cards->pluck('symbol', 'id')->toArray(),
                     ];
                     break;
                 case "examples":
                     $item["examples"] = [
                         "text" => htmlentities(implode(', ', $row->examples->pluck('example')->toArray())),
-                        "text" => '',
-                        "count" => $row->examples_count,
+                        //"text" => '',
+                        //"count" => $row->examples_count,
+                        "data" => $row->examples->pluck('example', 'id')->toArray(),
                     ];
                     break;
                 case "action":

@@ -149,6 +149,113 @@ $(document).ready( function () {
 
     });
 
+    //////////////////////////////////////////////////////////////////////////////////
+    //
+    //                          CRUD Label
+    //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    $(document).on('shown.bs.modal', '#tp_modal_label', function (event) {
+
+        // get operation from button that triggered the modal form
+        var button = $(event.relatedTarget);
+        var op = button.data('op');
+
+        switch(op) {
+        case "new":
+
+            // configure modal form
+            $('#tp_modal_label_title').html('Create Card');
+
+            // initialize modal form values
+            $('#tp_label_id').val('');
+            $('#tp_label_user_id').val(tp.state.filter.user);
+            $('#tp_label_label').val('');
+            $('#tp_label_cards').val([]).change();
+
+            break;
+
+        case "edit":
+        case "clone":
+
+            var data = tp.dt.label.row(button.closest('tr')).data();
+            console.log(data);
+
+            // configure modal form
+            if (op == "edit"){
+                $('#tp_modal_label_title').html('Edit Label');
+                $('#tp_label_id').val(data.id);
+            } else {
+                $('#tp_modal_label_title').html('Clone Label');
+                $('#tp_label_id').val('');
+            }
+
+            // code block
+            $('#tp_label_user_id').val(tp.state.filter.user);
+            $('#tp_label_label').val(data.label);
+
+            // add selected labels
+            var el = $('#tp_label_cards');
+            el.val(null).trigger('change', true);
+            for (var key in data.cards.data){
+                var option = new Option(data.cards.data[key], key, true, true );
+                el.append(option);
+            }
+
+            break;
+
+        default:
+
+            // code block
+            console.assert(true);
+        } 
+
+    });
+
+    $(document).on('shown.bs.modal', '#tp_modal_label_delete', function (event) {
+
+        // get card id
+        var button = $(event.relatedTarget);
+        var data = tp.dt.label.row(button.closest('tr')).data();
+
+        $('#tp_label_delete_id').val(data.id);
+        $('#tp_label_delete_user_id').val(tp.state.filter.user);
+        $('#tp_label_delete_text').html('Do you really want to delete label "'  + data.label + '"?');
+
+    });
+
+    $(document).on('click', '#tp_label_submit', function (event) {
+        $.ajax({
+            type: 'post',
+            url: '/labels/store',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: $('#tp_modal_label_form').serialize(),
+            success: function(){
+                console.log('Ok');
+                refreshAll(['data']);
+            }
+        });
+    });
+
+    $(document).on('click', '#tp_label_delete', function (event) {
+        $.ajax({
+            type: 'post',
+            url: '/labels/delete',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: $('#tp_label_delete_form').serialize(),
+            success: function(){
+                console.log('Ok');
+                refreshAll(['data']);
+            }
+        });
+    });
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //
+    //                          CRUD Card
+    //
+    //////////////////////////////////////////////////////////////////////////////////
+
     $(document).on('shown.bs.modal', '#tp_modal_card', function (event) {
 
         // get operation from button that triggered the modal form
@@ -159,47 +266,58 @@ $(document).ready( function () {
         case "new":
 
             // configure modal form
-            $('#tp_modal_title').html('Create Card');
-            $('#_method_change').val('POST');
+            $('#tp_modal_card_title').html('Create Card');
 
             // initialize modal form values
-            $('#tp_modal_card #tp_symbol').val('');
-            $('#tp_modal_card #tp_pinyin').val('');
-            $('#tp_modal_card #tp_translation').val('');
-            $('#tp_modal_card #tp_comment').val('');
-            $('#tp_modal_card #tp_labels').val([]).change();
-            $('#tp_modal_card #tp_examples').val([]).change();
+            $('#tp_card_id').val('');
+            $('#tp_card_user_id').val(tp.state.filter.user);
+            $('#tp_card_symbol').val('');
+            $('#tp_card_pinyin').val('');
+            $('#tp_card_translation').val('');
+            $('#tp_card_comment').val('');
+            $('#tp_card_labels').val([]).change();
+            $('#tp_card_examples').val([]).change();
 
             break;
 
         case "edit":
         case "clone":
 
-            var data = table.row(button.parents('tr')).data();
+            var data = tp.dt.card.row(button.closest('tr')).data();
             console.log(data);
 
             // configure modal form
             if (op == "edit"){
-                $('#tp_modal_title').html('Edit Card');
-                $('#_method_change').val('PUT');
-                $('#tp_modal_card_form').attr('action', '/cards/' + data.id);
+                $('#tp_modal_card_title').html('Edit Card');
+                $('#tp_card_id').val(data.id);
             } else {
-                $('#tp_modal_title').html('Clone Card');
-                $('#_method_change').val('POST');
+                $('#tp_modal_card_title').html('Clone Card');
+                $('#tp_card_id').val('');
             }
 
             // code block
-            $('#tp_modal_card #tp_symbol').val(data.symbol.symbol);
-            $('#tp_modal_card #tp_pinyin').val(data.pinyin);
-            $('#tp_modal_card #tp_translation').val(data.translation);
-            $('#tp_modal_card #tp_comment').val(data.comment);
-            $('#tp_modal_card #tp_examples').val(data.examples.ids).change();
+            $('#tp_card_user_id').val(tp.state.filter.user);
+            $('#tp_card_symbol').val(data.symbol.symbol);
+            $('#tp_card_pinyin').val(data.pinyin);
+            $('#tp_card_translation').val(data.translation);
+            $('#tp_card_comment').val(data.comment);
+            $('#tp_card_examples').val(data.examples.ids).change();
 
-            $('#tp_modal_card #tp_labels').val(null).trigger('change');
-            $('#tp_modal_card #tp_labels').append('data', [{id: '10', text: 'text10'}, {id: '20', text: 'text20'}]);
+            // add selected labels
+            var el = $('#tp_card_labels');
+            el.val(null).trigger('change', true);
+            for (var key in data.labels.data){
+                var option = new Option(data.labels.data[key], key, true, true );
+                el.append(option);
+            }
 
-            /* $('#tp_modal_card #tp_labels').val(JSON.parse(el_tr.find('[tp_item="tp_labels"]').attr('tp_value'))).change(); */
-            /* $('#tp_modal_card #tp_examples').val(JSON.parse(el_tr.find('[tp_item="tp_examples"]').attr('tp_value'))).change(); */
+            // add selected examples
+            el = $('#tp_card_examples');
+            el.val(null).trigger('change', true);
+            for (var key in data.examples.data){
+                var option = new Option(data.examples.data[key], key, true, true );
+                el.append(option);
+            }
 
             break;
 
@@ -215,16 +333,149 @@ $(document).ready( function () {
 
         // get card id
         var button = $(event.relatedTarget);
-        var el_tr = $(button).closest('tr');
-        var id = el_tr.data('id');
+        var data = tp.dt.card.row(button.closest('tr')).data();
 
         // update modal form content
-        $('#tp_modal_card_delete_form').attr('action', '/cards/' + id);
-        $('#tp_modal_card_delete_text').html('Do you really want to delete '  + id + '?');
+        $('#tp_card_delete_id').val(data.id);
+        $('#tp_card_delete_user_id').val(tp.state.filter.user);
+        $('#tp_card_delete_text').html('Do you really want to delete card "'  + data.symbol.symbol + '"?');
 
     });
-} );
 
+    $(document).on('click', '#tp_card_submit', function () {
+        $.ajax({
+            type: 'post',
+            url: '/cards/store',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: $('#tp_modal_card_form').serialize(),
+            success: function(){
+                console.log('Ok');
+                refreshAll(['data']);
+            }
+        });
+    });
+
+    $(document).on('click', '#tp_card_delete', function () {
+        console.log('ok');
+        $.ajax({
+            type: 'post',
+            url: '/cards/delete',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: $('#tp_card_delete_form').serialize(),
+            success: function(){
+                console.log('Ok');
+                refreshAll(['data']);
+            }
+        });
+    });
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //
+    //                          CRUD Example
+    //
+    //////////////////////////////////////////////////////////////////////////////////
+
+    $(document).on('shown.bs.modal', '#tp_modal_example', function (event) {
+
+        // get operation from button that triggered the modal form
+        var button = $(event.relatedTarget);
+        var op = button.data('op');
+
+        switch(op) {
+        case "new":
+
+            // configure modal form
+            $('#tp_modal_example_title').html('Create Example');
+
+            // initialize modal form values
+            $('#tp_example_id').val('');
+            $('#tp_example_user_id').val(tp.state.filter.user);
+            $('#tp_example_example').val('');
+            $('#tp_example_translation').val('');
+            $('#tp_example_cards').val([]).change();
+
+            break;
+
+        case "edit":
+        case "clone":
+
+            var data = tp.dt.example.row(button.closest('tr')).data();
+            console.log(data);
+
+            // configure modal form
+            if (op == "edit"){
+                $('#tp_modal_example_title').html('Edit Example');
+                $('#tp_example_id').val(data.id);
+            } else {
+                $('#tp_modal_example_title').html('Clone Example');
+                $('#tp_example_id').val('');
+            }
+
+            // code block
+            $('#tp_example_user_id').val(tp.state.filter.user);
+            $('#tp_example_example').val(data.example.example);
+            $('#tp_example_translation').val(data.translation);
+            $('#tp_example_cards').val(data.cards.ids).change();
+
+            // add selected cards
+            var el = $('#tp_example_cards');
+            el.val(null).trigger('change', true);
+            for (var key in data.cards.data){
+                var option = new Option(data.cards.data[key], key, true, true );
+                el.append(option);
+            }
+
+            break;
+
+        default:
+
+            // code block
+            console.assert(true);
+        } 
+
+    });
+
+    $(document).on('shown.bs.modal', '#tp_modal_example_delete', function (event) {
+
+        // get example id
+        var button = $(event.relatedTarget);
+        var data = tp.dt.example.row(button.closest('tr')).data();
+
+        // update modal form content
+        $('#tp_example_delete_id').val(data.id);
+        $('#tp_example_delete_user_id').val(tp.state.filter.user);
+        $('#tp_example_delete_text').html('Do you really want to delete example "' + data.example.example + '"?');
+
+    });
+
+    $(document).on('click', '#tp_example_submit', function () {
+        $.ajax({
+            type: 'post',
+            url: '/examples/store',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: $('#tp_modal_example_form').serialize(),
+            success: function(){
+                console.log('Ok');
+                refreshAll(['data']);
+            }
+        });
+    });
+
+    $(document).on('click', '#tp_example_delete', function () {
+        console.log('ok');
+        $.ajax({
+            type: 'post',
+            url: '/examples/delete',
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            data: $('#tp_example_delete_form').serialize(),
+            success: function(){
+                console.log('Ok');
+                refreshAll(['data']);
+            }
+        });
+    });
+
+} );
 function refreshDatatableLabel(){
 
     if ('label' in tp.dt){
@@ -258,6 +509,16 @@ function refreshDatatableLabel(){
                 }, {
                     searchable: false,
                     render: function(data, type, row){
+                        var cards = '';
+                        // There are too many cards associated with a label, 
+                        // so we don't list all of them in the tooltip
+                        //
+                        //for (var key in row.cards.data){
+                        //    if (cards){
+                        //        cards += ',';
+                        //    }
+                        //    cards += row.cards.data[key];
+                        //}
                         var text = '';
                         text += '<a href="#" ';
                         text += 'class="tp_rel" ';
@@ -266,8 +527,8 @@ function refreshDatatableLabel(){
                         text += 'data-text="' + row.label + '" ';
                         text += 'data-toggle="tooltip" ';
                         text += 'data-html="true" ';
-                        text += 'title="' + row.cards.text + '">';
-                        text += row.cards.count ;
+                        text += 'title="' + cards + '">';
+                        text += Object.entries(row.cards.data).length;
                         text += '</a>';
                         return text;
                     },
@@ -360,6 +621,13 @@ function refreshDatatableCard(){
             }, {
                 searchable: false,
                 render: function(data, type, row){
+                    var labels = '';
+                    for (var key in row.labels.data){
+                        if (labels){
+                            labels += ',';
+                        }
+                        labels += row.labels.data[key];
+                    }
                     var text = '';
                     text += '<a href="#" ';
                     text += 'class="tp_rel" ';
@@ -368,8 +636,8 @@ function refreshDatatableCard(){
                     text += 'data-text="' + row.symbol.symbol + '" ';
                     text += 'data-toggle="tooltip" ';
                     text += 'data-html="true" ';
-                    text += 'title="' + row.labels.text + '">';
-                    text += row.labels.count ;
+                    text += 'title="' + labels + '">';
+                    text += Object.entries(row.labels.data).length;
                     text += '</a>';
                     return text;
                 },
@@ -377,6 +645,13 @@ function refreshDatatableCard(){
             }, {
                 searchable: false,
                 render: function(data, type, row){
+                    var examples = '';
+                    for (var key in row.examples.data){
+                        if (examples){
+                            examples += ',';
+                        }
+                        examples += row.examples.data[key];
+                    }
                     var text = '';
                     text += '<a href="#" ';
                     text += 'class="tp_rel" ';
@@ -385,8 +660,8 @@ function refreshDatatableCard(){
                     text += 'data-text="' + row.symbol.symbol + '" ';
                     text += 'data-toggle="tooltip" ';
                     text += 'data-html="true" ';
-                    text += 'title="' + row.examples.text + '">';
-                    text += row.examples.count;
+                    text += 'title="' + examples + '">';
+                    text += Object.entries(row.examples.data).length;
                     text += '</a>';
                     return text;
                 },
@@ -483,6 +758,13 @@ function refreshDatatableExample(){
             }, {
                 searchable: false,
                 render: function(data, type, row){
+                    var cards = '';
+                    for (var key in row.cards.data){
+                        if (cards){
+                            cards += ',';
+                        }
+                        cards += row.cards.data[key];
+                    }
                     var text = '';
                     text += '<a href="#" ';
                     text += 'class="tp_rel" ';
@@ -491,8 +773,8 @@ function refreshDatatableExample(){
                     text += 'data-text="' + row.example.example + '" ';
                     text += 'data-toggle="tooltip" ';
                     text += 'data-html="true" ';
-                    text += 'title="' + row.cards.text + '">';
-                    text += row.cards.count ;
+                    text += 'title="' + cards + '">';
+                    text += Object.entries(row.cards.data).length ;
                     text += '</a>';
                     return text;
                 },
@@ -503,23 +785,23 @@ function refreshDatatableExample(){
                 render: function(data, type, row){
                     var text = '';
                     text += '<button class="btn btn-sm " '; 
-                    text += 'title="Edit card" '; 
+                    text += 'title="Edit example" '; 
                     text += 'data-toggle="modal" '; 
-                    text += 'data-target="#tp_modal_card" '; 
+                    text += 'data-target="#tp_modal_example" '; 
                     text += 'data-op="edit">';
                     text += '<i class="fa fa-edit"></i>';
                     text += '</button>';
                     text += '<button class="btn btn-sm " '; 
-                    text += 'title="Clone card" '; 
+                    text += 'title="Clone example" '; 
                     text += 'data-toggle="modal" '; 
-                    text += 'data-target="#tp_modal_card" '; 
+                    text += 'data-target="#tp_modal_example" '; 
                     text += 'data-op="clone">';
                     text += '<i class="fa fa-clone"></i>';
                     text += '</button>';
                     text += '<button class="btn btn-sm btn-danger" '; 
-                    text += 'title="Delete card" '; 
+                    text += 'title="Delete example" '; 
                     text += 'data-toggle="modal" '; 
-                    text += 'data-target="#tp_modal_card_delete">';
+                    text += 'data-target="#tp_modal_example_delete">';
                     text += '<i class="fa fa-trash"></i>';
                     text += '</button>';
                     return text;
@@ -885,10 +1167,12 @@ function initCanvas() {
     });
 
     canvas.addEventListener("touchend", function (e) {
+        e.preventDefault();
         tp.draw.touchPressed = false;
     });
 
     canvas.addEventListener("touchcancel", function (e) {
+        e.preventDefault();
         tp.draw.touchPressed = false;
     });
 
