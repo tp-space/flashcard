@@ -9,6 +9,7 @@ use Google\Cloud\TextToSpeech\V1\SsmlVoiceGender;
 use Google\Cloud\TextToSpeech\V1\SynthesisInput;
 use Google\Cloud\TextToSpeech\V1\TextToSpeechClient;
 use Google\Cloud\TextToSpeech\V1\VoiceSelectionParams;
+use Aws\Ssm\SsmClient;
 
 use Exception;
 
@@ -80,17 +81,35 @@ class AudioController extends Controller
         self::checkType($type);
         self::checkId($id);
 
-        $credentials = base_path() . DIRECTORY_SEPARATOR . 
-            env('GOOGLE_APPLICATION_CREDENTIALS', '');
-        
-        // Check if google cloud credential file exists
-        if (!file_exists($credentials)){
-            throw new Exception('Google Cloud Credential missing. ' .
-                'Please check the GOOGLE_APPLICATION_CREDENTIALS variable ' .
-                ' in the .env file');
-        }
+        $googleAppCred = env('GOOGLE_APPLICATION_CREDENTIALS', '');
 
-        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $credentials);
+        if ($googleAppCred == ""){
+
+            $jsonFile = base_path() . DIRECTORY_SEPARATOR . "aws.json";
+
+            $aws = new SsmClient([
+                'version' => 'latest',
+                'region' => 'eu-west-1',
+            ]);
+
+            $data = $aws->getParameter([
+                'Name' => 'flashcard-googleapi',
+                'WithDecryption' => true,
+            ]);
+
+            file_put_contents($jsonFile, $data['Parameter']['Value']);
+
+        } else {
+
+            $jsonFile = base_path() . DIRECTORY_SEPARATOR . $googleAppCred;
+            if (!file_exists($jsonFile)){
+                throw new Exception('Google Cloud Credential missing. ' .
+                    'Please check the GOOGLE_APPLICATION_CREDENTIALS variable ' .
+                    ' in the .env file');
+            }
+        }
+        
+        putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $jsonFile);
 
         /** Uncomment and populate these variables in your code */
         $text = $symbol;
