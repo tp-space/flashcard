@@ -9,6 +9,8 @@ var tp = {
         lastTouchX: null, 
         lastTouchY: null,
         ctx: null,
+        strokes: [],
+        currentStroke: [],
     },
     quiz: {
         doneId: null,
@@ -44,6 +46,7 @@ $(document).ready( function () {
     });
 
     $(document).on('click', '#tp-reset', function (event) {
+        clearCanvas();
         refreshAll(['data', 'reset']);
     });
 
@@ -52,6 +55,7 @@ $(document).ready( function () {
         if (tp.state.quiz.visibleFields.indexOf('tp-toggle-audio') > -1){
             tp.quiz.play = true;
         }
+        clearCanvas();
         refreshAll(['data']);
     });
 
@@ -60,6 +64,7 @@ $(document).ready( function () {
         if (tp.state.quiz.visibleFields.indexOf('tp-toggle-audio') > -1){
             tp.quiz.play = true;
         }
+        clearCanvas();
         refreshAll(['data', 'done']);
     });
 
@@ -134,9 +139,11 @@ $(document).ready( function () {
     });
 
     $(document).on('click', '#tp-canvas-clear', function (event) {
-        // Use the identity matrix while clearing the canvas
-        tp.draw.ctx.setTransform(1, 0, 0, 1, 0, 0);
-        tp.draw.ctx.clearRect(0, 0, tp.draw.ctx.canvas.width, tp.draw.ctx.canvas.height);
+        clearCanvas();
+    });
+
+    $(document).on('click', '#tp-canvas-undo', function (event) {
+        undoStoke();
     });
 
     $(window).on('resize', function(){
@@ -476,6 +483,14 @@ $(document).ready( function () {
     });
 
 } );
+
+
+    //////////////////////////////////////////////////////////////////////////////////
+    //
+    //                          Functions
+    //
+    //////////////////////////////////////////////////////////////////////////////////
+
 function refreshDatatableLabel(){
 
     if ('label' in tp.dt){
@@ -970,6 +985,9 @@ function refreshQuizData(data){
     // display card or not
     if (data.card == null){
 
+        var num = (Math.floor(Math.random() * 5) + 1);
+        $('#tp-img-celebrate').attr("src", "img/" + num.toString() + ".gif");
+
         $('#tp_quiz .tp-has-card').hide();
         $('#tp_quiz .tp-no-card').show();
 
@@ -1147,6 +1165,8 @@ function initCanvas() {
     // prevent canvas stretching by setting the canvas size to the element's size
     tp.draw.ctx.canvas.width = tp.draw.ctx.canvas.offsetWidth;
     tp.draw.ctx.canvas.height = tp.draw.ctx.canvas.offsetHeight;
+    tp.draw.strokes = [];
+    tp.draw.currentStroke = [];
 
     // add touch event handler (for tablets)
     canvas.addEventListener("touchstart", function (e) {
@@ -1169,10 +1189,14 @@ function initCanvas() {
     canvas.addEventListener("touchend", function (e) {
         e.preventDefault();
         tp.draw.touchPressed = false;
+        stopStroke();
     });
 
     canvas.addEventListener("touchcancel", function (e) {
         e.preventDefault();
+        if (tp.draw.touchPressed){
+            stopStroke();
+        }
         tp.draw.touchPressed = false;
     });
 
@@ -1194,9 +1218,13 @@ function initCanvas() {
 
     $('#tp-canvas').mouseup(function (e) {
         tp.draw.mousePressed = false;
+        stopStroke();
     });
 
     $('#tp-canvas').mouseleave(function (e) {
+        if (tp.draw.mousePressed){
+            stopStroke();
+        }
         tp.draw.mousePressed = false;
     });
 }
@@ -1211,6 +1239,12 @@ function drawTouchCanvas(x, y, isDown) {
         tp.draw.ctx.lineTo(x, y);
         tp.draw.ctx.closePath();
         tp.draw.ctx.stroke();
+        tp.draw.currentStroke.push({
+            fromX: tp.draw.lastTouchX,
+            fromY: tp.draw.lastTouchY,
+            toX:x, 
+            toY:y
+        });
     }
     tp.draw.lastTouchX = x; tp.draw.lastTouchY = y;
 }
@@ -1225,7 +1259,51 @@ function drawMouseCanvas(x, y, isDown) {
         tp.draw.ctx.lineTo(x, y);
         tp.draw.ctx.closePath();
         tp.draw.ctx.stroke();
+        tp.draw.currentStroke.push({
+            fromX: tp.draw.lastMouseX,
+            fromY: tp.draw.lastMouseY,
+            toX:x, 
+            toY:y
+        });
     }
 
     tp.draw.lastMouseX = x; tp.draw.lastMouseY = y;
+}
+
+function clearCanvas(){
+    // Use the identity matrix while clearing the canvas
+    if ((tp) && (tp.draw) && (tp.draw.ctx)){
+        tp.draw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        tp.draw.ctx.clearRect(0, 0, tp.draw.ctx.canvas.width, tp.draw.ctx.canvas.height);
+        tp.draw.strokes = [];
+        tp.draw.currentStroke = [];
+    }
+}
+
+function stopStroke(){
+    if (tp.draw.currentStroke.length > 0){
+        tp.draw.strokes.push(tp.draw.currentStroke);
+        tp.draw.currentStroke = [];
+    }
+}
+
+function undoStoke(){
+    if ((tp.draw.strokes.length > 0) && (tp) && (tp.draw) && (tp.draw.ctx)){
+        tp.draw.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        tp.draw.ctx.clearRect(0, 0, tp.draw.ctx.canvas.width, tp.draw.ctx.canvas.height);
+        tp.draw.strokes.pop();
+        for (let i = 0; i < tp.draw.strokes.length; i++){
+            for (let j = 0; j < tp.draw.strokes[i].length; j++){
+                let point = tp.draw.strokes[i][j];
+                tp.draw.ctx.beginPath();
+                tp.draw.ctx.strokeStyle = 'black';
+                tp.draw.ctx.lineWidth = 1;
+                tp.draw.ctx.lineJoin = "round";
+                tp.draw.ctx.moveTo(point.fromX, point.fromY);
+                tp.draw.ctx.lineTo(point.toX, point.toY);
+                tp.draw.ctx.closePath();
+                tp.draw.ctx.stroke();
+            }
+        }
+    }
 }

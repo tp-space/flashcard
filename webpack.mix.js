@@ -23,6 +23,7 @@ mix
     .copyDirectory("node_modules/datatables.net-dt/images", "public/comp/datatables.net/images")
     .copyDirectory("node_modules/datatables.net-dt/css", "public/comp/datatables.net/css")
     .copyDirectory("node_modules/datatables.net-plugins/api", "public/comp/datatables.net-plugins/api")
+    .copyDirectory("resources/img", "public/img")
     .scripts('resources/js/main.js', 'public/js/main.js').version();
 
 // Full API

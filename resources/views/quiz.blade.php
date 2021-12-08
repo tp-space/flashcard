@@ -11,7 +11,14 @@
     </div>
 </div>
 
-<span class="tp-no-card">No cards left</span>
+<div class="tp-no-card">
+    <div class="text-center">
+        <img id="tp-img-celebrate" src="img/1.gif" alt="">
+    </div>
+    <div class="text-center mt-3 mb-3">
+        <span >No cards left</span>
+    </div>
+</div>
 
 <div class="tp-has-card">
     <div class="row mt-3 mb-3">
@@ -47,7 +54,7 @@
                 <div class="row">
                     <button id="tp-toggle-symbol" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Symbol:</button>
                     <div class="col-sm-9">
-                        <strong><span class="h2 tp-toggle-symbol"></span></strong>
+                        <strong><span class="h1 tp-toggle-symbol"></span></strong>
                     </div>
                 </div>
 
@@ -86,7 +93,14 @@
             </div>
         </div>
         <div class="col-md-6" style="height: 300px">
-            <button id="tp-canvas-clear" class="btn btn-secondary" style="width: 100%;height: 10%;">Clear Drawing</button>
+            <div class="row mb-3 mt-3" style="height: 10%">
+                <div class="col-md-6">
+                    <button id="tp-canvas-clear" class="btn btn-secondary" style="width: 100%;height: 100%;">Clear Drawing</button>
+                </div>
+                <div class="col-md-6">
+                    <button id="tp-canvas-undo" class="btn btn-secondary" style="width: 100%;height: 100%;">Undo Stroke</button>
+                </div>
+            </div>
             <canvas id="tp-canvas" style="width: 100%;height: 90%;border: 2px solid black; touch-action: none;"></canvas>
         </div>
     </div>
