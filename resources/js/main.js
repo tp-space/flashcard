@@ -130,6 +130,11 @@ $(document).ready( function () {
 
     $(document).on('click', '#tp-show-hide', function (event) {
         tp.state.quiz.state = (tp.state.quiz.state == 'Show' ? 'Hide' : 'Show');
+        if (tp.state.quiz.state == 'Hide'){
+            if (tp.state.quiz.visibleFields.indexOf('tp-toggle-audio') == -1){
+                tp.quiz.play = true;
+            }
+        }
         refreshAll(['visibleFields']);
     });
 
@@ -1070,6 +1075,12 @@ function refreshVisibleFields(){
                 $('#' + item.id).removeClass('text-success');
             }
         });
+
+        // audio playback
+        if (tp.quiz.play == true){
+            tp.quiz.play = false;
+            $("#tp-card-audio").trigger('click');
+        }
 }
 
 function switchToLabel(){
