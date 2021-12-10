@@ -16,11 +16,15 @@ var tp = {
         doneId: null,
         reset: false,
         play: false,
+        writer: null,
     }
 }
 
 
+
+
 $(document).ready( function () {
+
 
     getInitState();
     
@@ -44,6 +48,11 @@ $(document).ready( function () {
         return;
 
     });
+
+    $(document).on('click', '.tp-hanzi', function (event) {
+        var index = $(this).data('index');
+        toggleHanziObject(tp.quiz.writer[index]);
+    })
 
     $(document).on('click', '#tp-reset', function (event) {
         clearCanvas();
@@ -1000,7 +1009,13 @@ function refreshQuizData(data){
         $('#tp_quiz .tp-has-card').show();
         $('#tp_quiz .tp-no-card').hide();
 
-        $('.tp-toggle-symbol').text(card.symbol);
+        $('#tp-symbol-div').empty();
+        tp.quiz.writer= [];
+        for (let i=0; i<card.symbol.length; i++){
+            $('#tp-symbol-div').append('<span id="tp-toggle-symbol-hanzi-' + i + '" data-index="' + i + '" class="tp-hanzi"></span>');
+            tp.quiz.writer.push(createHanziObject('tp-toggle-symbol-hanzi-' + i, card.symbol.substr(i,1)));
+        }
+
         $('.tp-toggle-pinyin').text(card.pinyin);
         $('.tp-toggle-translation').text(card.translation);
         $('.tp-toggle-comment').text(card.comment);
@@ -1307,3 +1322,48 @@ function undoStoke(){
         }
     }
 }
+function createHanziObject(elem, hanzi){
+
+    let w = HanziWriter.create(elem, hanzi, {
+        charDataLoader: function(hanzi, onComplete) {
+            $.getJSON("comp/hanzi-writer-data/" + hanzi + ".json", function(charData) {
+                onComplete(charData);
+            });
+        },
+        width: 50,
+        height: 50,
+        showCharacter: true,
+        showOutline: true,
+        strokeAnimationSpeed: 0.5, // 5x normal speed
+        delayBetweenStrokes: 10, // milliseconds
+        delayBetweenLoops: 0,
+        padding: 0,
+    });
+
+    return {
+        obj: w,
+        animated: false,
+        paused: false,
+    };
+}
+
+function toggleHanziObject(w){
+    if (w.animated){
+        if (w.paused){
+            w.obj.resumeAnimation();
+            w.paused = false;
+        } else {
+            w.obj.pauseAnimation();
+            w.paused = true;
+        }
+    } else {
+        w.animated = true;
+        w.obj.animateCharacter({
+            onComplete: function(){
+                w.animated = false;
+                w.paused = false;
+            }
+        });
+    };
+}
+

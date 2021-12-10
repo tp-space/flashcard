@@ -53,8 +53,7 @@
 
                 <div class="row">
                     <button id="tp-toggle-symbol" class="btn btn-sm btn-link tp-toggle col-sm-3 text-left">Symbol:</button>
-                    <div class="col-sm-9">
-                        <strong><span class="h1 tp-toggle-symbol"></span></strong>
+                    <div id="tp-symbol-div" class="col-sm-9 tp-toggle-symbol">
                     </div>
                 </div>
 

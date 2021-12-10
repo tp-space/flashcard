@@ -46,6 +46,9 @@
         <!-- Latest compiled and minified JavaScript bootstrap-select -->
         <script src="/comp/select2/js/select2.min.js"></script>
 
+        <!-- Latest compiled and minified hanzi-writer JavaScript -->
+        <script src="/comp/hanzi-writer/hanzi-writer.min.js"></script>
+
         <!-- Datatables -->
         <script type="text/javascript" charset="utf8" src="/comp/datatables.net/js/jquery.dataTables.js"></script>
         <script type="text/javascript" charset="utf8" src="/comp/datatables.net-plugins/api/row().show().js"></script>
